@@ -1,0 +1,15 @@
+<html>
+<head>
+	<script type="text/javascript" src="src/util/calcutil.js"></script>
+</head>
+<body>
+	Test
+
+	<script type="text/javascript">
+		for (var i = 100000; i <= 1000000; i = i + 10000) {
+			console.log(i + "," + calculate(i, 'm', 2019, 'CA').totals.tax);
+		}
+
+	</script>
+</body>
+</html>

@@ -1,25 +1,53 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import { Container, CssBaseline, Avatar, Typography, TextField, Button, ThemeProvider } from '@material-ui/core';
+import MonetizationOnRoundedIcon from '@material-ui/icons/MonetizationOnRounded';
+import { makeStyles, createMuiTheme } from '@material-ui/core/styles';
+import CalculatorComponent from './components/calculatorcomponent';
+import 'fontsource-roboto';
+
+const useStyles = makeStyles((theme) => ({
+  paper: {
+    marginTop: theme.spacing(8),
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginTop: theme.spacing(1)
+  },
+  avatar: {
+    margin: theme.spacing(1),
+    backgroundColor: theme.palette.secondary.main,
+  },
+  form: {
+    width: '100%', // Fix IE 11 issue.
+    marginTop: theme.spacing(1),
+  },
+  submit: {
+    margin: theme.spacing(3, 0, 2),
+  },
+}));
+
 
 function App() {
+  const classes = useStyles();
+  const theme = createMuiTheme({
+    typography: {
+      fontSize: 16,
+    },
+  });
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ThemeProvider theme={theme}>
+      <Container component="main" maxWidth="xs">
+        <CssBaseline />
+          <div className={classes.paper}>
+            <Avatar className={classes.avatar}>
+              <MonetizationOnRoundedIcon />
+            </Avatar>
+            <CalculatorComponent useClasses={classes}/>
+          </div>
+      </Container>
+    </ThemeProvider>
   );
 }
 
