@@ -21,9 +21,9 @@ class CalculatorComponent extends React.Component {
         this.state = {
             income : 100000,
             status : 'm',
-            year : '2019',
+            year : '2021',
             state : 'CA',
-            calculation : calculate(100000, 'm', '2019', 'CA')
+            calculation : calculate(100000, 'm', '2021', 'CA')
         };
     }
 
