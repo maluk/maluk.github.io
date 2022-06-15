@@ -9,6 +9,7 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: 14
+    - run: npm install build
     - run: npm run-script build
     - uses: peaceiris/actions-gh-pages@v3
       with:
