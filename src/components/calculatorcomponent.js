@@ -14,16 +14,22 @@ class CalculatorComponent extends React.Component {
             maximumFractionDigits: 0
           });
 
+        this.percentageFormatter = new Intl.NumberFormat('en-US', {
+            style: 'percent',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          });
+
         this.handlechange = this.handlechange.bind(this);
         this.handleSatusClick = this.handleSatusClick.bind(this);
         this.handleYearClick = this.handleYearClick.bind(this);
 
         this.state = {
             income : 100000,
-            status : 'm',
-            year : '2021',
+            status : 's',
+            year : '2022',
             state : 'CA',
-            calculation : calculate(100000, 'm', '2021', 'CA')
+            calculation : calculate(100000, 's', '2022', 'CA')
         };
     }
 
@@ -100,14 +106,6 @@ class CalculatorComponent extends React.Component {
                                     <Chip
                                         variant="outlined"
                                         clickable
-                                        label="2019"
-                                        onClick={this.handleYearClick}
-                                        color="secondary"
-                                        color={this.state.year == '2019' ? 'secondary' : ''}
-                                    />
-                                    <Chip
-                                        variant="outlined"
-                                        clickable
                                         label="2021"
                                         onClick={this.handleYearClick}
                                         color={this.state.year == '2021' ? 'secondary' : ''}
@@ -172,6 +170,10 @@ class CalculatorComponent extends React.Component {
                             </TableRow>
                             <TableRow>
                                 <TableCell colSpan={2} style={{fontWeight : 600}}>Totals</TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>Effective Tax Rate</TableCell>
+                                <TableCell align="right">{this.percentageFormatter.format(this.state.calculation.totals.tax / this.state.income)}</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell>Total Tax</TableCell>
