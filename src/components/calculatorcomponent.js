@@ -112,6 +112,13 @@ class CalculatorComponent extends React.Component {
                                         onClick={this.handleYearClick}
                                         color={this.state.year == '2021' ? 'secondary' : ''}
                                     />
+                                    <Chip
+                                        variant="outlined"
+                                        clickable
+                                        label="2022"
+                                        onClick={this.handleYearClick}
+                                        color={this.state.year == '2022' ? 'secondary' : ''}
+                                    />
                                 </TableCell>
                             </TableRow>
                             <TableRow>
