@@ -23,6 +23,7 @@ class CalculatorComponent extends React.Component {
         this.handlechange = this.handlechange.bind(this);
         this.handleSatusClick = this.handleSatusClick.bind(this);
         this.handleYearClick = this.handleYearClick.bind(this);
+        this.handleStateClick = this.handleStateClick.bind(this);
 
         this.state = {
             income : 100000,
@@ -53,6 +54,14 @@ class CalculatorComponent extends React.Component {
         this.setState({
             year : year,
             calculation : calculate(this.state.income, this.state.status, year, this.state.state)
+        });
+    }
+
+    handleStateClick(event) {
+        const state = event.target.textContent;
+        this.setState({
+            state : state,
+            calculation : calculate(this.state.income, this.state.status, this.state.year, state)
         });
     }
 
@@ -126,7 +135,29 @@ class CalculatorComponent extends React.Component {
                                         variant="outlined"
                                         clickable
                                         label="CA"
-                                        color="secondary"
+                                        onClick={this.handleStateClick}
+                                        color={this.state.state == 'CA' ? 'secondary' : ''}
+                                    />
+                                    <Chip
+                                        variant="outlined"
+                                        clickable
+                                        label="NY"
+                                        onClick={this.handleStateClick}
+                                        color={this.state.state == 'NY' ? 'secondary' : ''}
+                                    />
+                                    <Chip
+                                        variant="outlined"
+                                        clickable
+                                        label="WA"
+                                        onClick={this.handleStateClick}
+                                        color={this.state.state == 'WA' ? 'secondary' : ''}
+                                    />
+                                    <Chip
+                                        variant="outlined"
+                                        clickable
+                                        label="TX"
+                                        onClick={this.handleStateClick}
+                                        color={this.state.state == 'TX' ? 'secondary' : ''}
                                     />
                                 </TableCell>
                             </TableRow>
