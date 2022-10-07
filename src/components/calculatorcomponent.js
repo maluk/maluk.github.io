@@ -190,7 +190,7 @@ class CalculatorComponent extends React.Component {
                                 <TableCell align="right">{this.formatter.format(this.state.calculation.medicare)}</TableCell>
                             </TableRow>
                             <TableRow>
-                                <TableCell colSpan={2} style={{fontWeight : 600}}>California State Taxes</TableCell>
+                                <TableCell colSpan={2} style={{fontWeight : 600}}>State Taxes</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell>Taxable Income</TableCell>
