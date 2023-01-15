@@ -195,10 +195,17 @@ class CalculatorComponent extends React.Component {
                             <TableRow>
                                 <TableCell>Taxable Income</TableCell>
                                 <TableCell align="right">{this.formatter.format(this.state.calculation.state.taxableAmount)}</TableCell>
-                            </TableRow>                            <TableRow>
+                            </TableRow>
+                            <TableRow>
                                 <TableCell>State Tax</TableCell>
                                 <TableCell align="right">{this.formatter.format(this.state.calculation.state.tax)}</TableCell>
                             </TableRow>
+                            {this.state.calculation.sdi > 0 &&
+                              <TableRow>
+                                  <TableCell>SDI</TableCell>
+                                  <TableCell align="right">{this.formatter.format(this.state.calculation.sdi)}</TableCell>
+                              </TableRow>
+                            }
                             <TableRow>
                                 <TableCell colSpan={2} style={{fontWeight : 600}}>Totals</TableCell>
                             </TableRow>
