@@ -70,7 +70,7 @@ class CalculatorComponent extends React.Component {
         <form className={this.props.useClasses.root} noValidate autoComplete="off">
             <Grid container spacing={2}>
                 <Grid item xs={12}>
-                    <Typography variant="h5" align={'center'}>US Income Tax Calculator (beta)</Typography>
+                    <Typography variant="h5" align={'center'}>US Income Tax Estimator</Typography>
                 </Grid>
                 <Grid item xs={12}>
                     <FormControl fullWidth className={this.props.useClasses.margin} variant="outlined">
