@@ -8,9 +8,10 @@ jobs:
     - uses: actions/checkout@v3
     - uses: actions/setup-node@v3
       with:
-        node-version: 14
+        node-version: 18
+    - run: npm install react-scripts --save
     - run: npm install build
-    - run: CI=false && npm run-script build
+    - run: CI=true && npm run-script build
     - uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
