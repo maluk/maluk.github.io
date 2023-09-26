@@ -66,7 +66,10 @@ const calculateSdi = (g, status, year, state) => {
     } else if (year == '2022') {
       rate = 0.011;
       cap = 1539.58;
-    }
+    } else if (year == '2023') {
+        rate = 0.009;
+        cap = 1378.48;
+      }
     return calculateFlat(g, rate, cap);
 }
 

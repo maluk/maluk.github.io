@@ -28,9 +28,9 @@ class CalculatorComponent extends React.Component {
         this.state = {
             income : 100000,
             status : 's',
-            year : '2022',
+            year : '2023',
             state : 'CA',
-            calculation : calculate(100000, 's', '2022', 'CA')
+            calculation : calculate(100000, 's', '2023', 'CA')
         };
     }
 
@@ -115,16 +115,16 @@ class CalculatorComponent extends React.Component {
                                     <Chip
                                         variant="outlined"
                                         clickable
-                                        label="2021"
+                                        label="2022"
                                         onClick={this.handleYearClick}
-                                        color={this.state.year == '2021' ? 'secondary' : ''}
+                                        color={this.state.year == '2022' ? 'secondary' : ''}
                                     />
                                     <Chip
                                         variant="outlined"
                                         clickable
-                                        label="2022"
+                                        label="2023"
                                         onClick={this.handleYearClick}
-                                        color={this.state.year == '2022' ? 'secondary' : ''}
+                                        color={this.state.year == '2023' ? 'secondary' : ''}
                                     />
                                 </TableCell>
                             </TableRow>
