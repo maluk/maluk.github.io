@@ -26,7 +26,7 @@ export const w = {
     }
   },
   2025: {
-    "s": {
+    s: {
       "deduction": 11925,
       "brackets": {
         "0": { "p": 0.1, "s": 0.0 },
@@ -38,7 +38,7 @@ export const w = {
         "626350": { "p": 0.37, "s": 188769.75 }
       }
     },
-    "m": {
+    m: {
       "deduction": 23850,
       "brackets": {
         "0": { "p": 0.1, "s": 0.0 },
