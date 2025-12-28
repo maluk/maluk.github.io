@@ -45,6 +45,9 @@ function App() {
               <MonetizationOnRoundedIcon />
             </Avatar>
             <CalculatorComponent useClasses={classes}/>
+            <Typography variant="caption" style={{ marginTop: '24px', color: '#9e9e9e', textAlign: 'center', display: 'block' }}>
+              Calculations are approximate and for the exact numbers I recommend to contact a tax specialist.
+            </Typography>
           </div>
       </Container>
     </ThemeProvider>
