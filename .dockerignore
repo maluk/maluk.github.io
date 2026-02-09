@@ -1,0 +1,7 @@
+node_modules
+build
+.git
+.kardbrd
+.env
+Dockerfile
+docker-compose.yml
