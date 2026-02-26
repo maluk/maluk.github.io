@@ -26,11 +26,11 @@ class CalculatorComponent extends React.Component {
         this.handleStateClick = this.handleStateClick.bind(this);
 
         this.state = {
-            income : 100000,
+            income : 150000,
             status : 's',
             year : '2026',
             state : 'CA',
-            calculation : calculate(100000, 's', '2026', 'CA')
+            calculation : calculate(150000, 's', '2026', 'CA')
         };
     }
 
