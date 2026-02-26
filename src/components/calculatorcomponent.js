@@ -2,8 +2,16 @@ import React from 'react';
 
 import { Chip, InputLabel, FormControl, Typography, Grid, Table, TableHead, TableRow, TableBody, TableCell, InputAdornment, OutlinedInput } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import { Link } from 'react-router-dom';
 import { calculate } from '../util/calcutil'
-import { CURRENT_YEAR } from '../seoConfig'
+import { CURRENT_YEAR, STATE_META, DEFAULT_META } from '../seoConfig'
+
+const STATE_CHIPS = [
+  { code: 'CA', slug: 'california' },
+  { code: 'NY', slug: 'new-york' },
+  { code: 'WA', slug: 'washington' },
+  { code: 'TX', slug: 'texas' },
+];
 
 const useFaqStyles = makeStyles((theme) => ({
   faqSection: {
@@ -57,7 +65,6 @@ class CalculatorComponent extends React.Component {
         this.handlechange = this.handlechange.bind(this);
         this.handleSatusClick = this.handleSatusClick.bind(this);
         this.handleYearClick = this.handleYearClick.bind(this);
-        this.handleStateClick = this.handleStateClick.bind(this);
 
         const initialState = props.initialState || 'CA';
         const initialYear = props.initialYear || CURRENT_YEAR;
@@ -94,19 +101,13 @@ class CalculatorComponent extends React.Component {
         });
     }
 
-    handleStateClick(event) {
-        const state = event.target.textContent;
-        this.setState({
-            state : state,
-            calculation : calculate(this.state.income, this.state.status, this.state.year, state)
-        });
-    }
-
     render() {
       const { stateMeta } = this.props;
       const pageHeading = stateMeta
         ? `${stateMeta.name} Paycheck Tax Calculator`
         : 'US Paycheck Tax Calculator';
+      const meta = stateMeta || DEFAULT_META;
+      const intro = meta.getIntro(this.state.year);
 
       return (
         <form className={this.props.useClasses && this.props.useClasses.root} noValidate autoComplete="off">
@@ -117,6 +118,9 @@ class CalculatorComponent extends React.Component {
                     </Typography>
                     <Typography variant="caption" align={'center'} display="block" color="textSecondary">
                         {this.state.year}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary" style={{ marginTop: '8px', textAlign: 'center' }}>
+                        {intro}
                     </Typography>
                 </Grid>
                 <Grid item xs={12}>
@@ -178,34 +182,17 @@ class CalculatorComponent extends React.Component {
                             <TableRow>
                                 <TableCell>State</TableCell>
                                 <TableCell align="right">
-                                    <Chip
-                                        variant="outlined"
-                                        clickable
-                                        label="CA"
-                                        onClick={this.handleStateClick}
-                                        color={this.state.state == 'CA' ? 'secondary' : ''}
-                                    />
-                                    <Chip
-                                        variant="outlined"
-                                        clickable
-                                        label="NY"
-                                        onClick={this.handleStateClick}
-                                        color={this.state.state == 'NY' ? 'secondary' : ''}
-                                    />
-                                    <Chip
-                                        variant="outlined"
-                                        clickable
-                                        label="WA"
-                                        onClick={this.handleStateClick}
-                                        color={this.state.state == 'WA' ? 'secondary' : ''}
-                                    />
-                                    <Chip
-                                        variant="outlined"
-                                        clickable
-                                        label="TX"
-                                        onClick={this.handleStateClick}
-                                        color={this.state.state == 'TX' ? 'secondary' : ''}
-                                    />
+                                    {STATE_CHIPS.map(({ code, slug }) => (
+                                        <Chip
+                                            key={code}
+                                            component={Link}
+                                            to={`/${slug}/`}
+                                            variant="outlined"
+                                            clickable
+                                            label={code}
+                                            color={this.state.state == code ? 'secondary' : ''}
+                                        />
+                                    ))}
                                 </TableCell>
                             </TableRow>
                         </TableBody>
