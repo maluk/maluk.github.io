@@ -5,47 +5,70 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-npm install          # Install dependencies
-npm start            # Start dev server at localhost:3000
-npm run build        # Production build (also used as the CI test gate)
-npm test             # Run tests in interactive watch mode
+npm start          # Dev server at http://localhost:3000
+npm test           # Run tests (interactive watch mode)
+npm test -- --watchAll=false  # Run tests once (non-interactive)
+npm run build      # Production build to ./build
 ```
 
-**Note:** On newer Node versions (18+), the build requires `NODE_OPTIONS=--openssl-legacy-provider` due to the older `react-scripts` version. This is already set in the Dockerfile.
+**Build note:** Due to webpack 4 + Node 18 compatibility, the CI uses `NODE_OPTIONS=--openssl-legacy-provider`. If builds fail locally with OpenSSL errors, prepend this env var.
 
 ## Architecture
 
-This is a **US Paycheck Tax Calculator** React app (Create React App) deployed at `thetax.us`. It uses Material-UI v4.
+This is a Create React App (React 16 + Material-UI v4) paycheck tax calculator deployed to thetax.us via GitHub Pages.
 
 ### Data flow
 
-1. `src/calc/data.js` — All tax bracket data, exported as two objects:
-   - `w` — Federal brackets: `w[year][status]` → `{deduction, brackets}`
-   - `s` — State brackets: `s[state][year][status]` → `{deduction, brackets}`
-   - Bracket entries use `{p: rate, s: cumulative_tax_at_bracket_start}` — the bracket key is the income threshold where that rate begins
-   - Supported states: CA, NY, TX, WA; supported years: 2025, 2026 (and 2024 historical)
+```
+src/calc/data.js          ← Static tax bracket tables (federal + state)
+    ↓ imported by
+src/util/calcutil.js      ← Pure calculation functions
+    ↓ imported by
+src/components/calculatorcomponent.js  ← Stateful class component (form + results)
+    ↓ rendered by
+src/App.js                ← MUI ThemeProvider wrapper + disclaimer footer
+```
 
-2. `src/util/calcutil.js` — Core calculation logic. The exported `calculate(income, status, year, state)` function calls individual calculators and returns `{fed, state, social, medicare, sdi, totals}`. Notable:
-   - `calculateProgressive()` looks up the appropriate bracket by walking sorted bracket keys
-   - Social Security uses a flat rate with a cap
-   - Medicare has an additional 0.9% on income above $200k
-   - SDI is CA-only, with hardcoded rates by year
+### Tax data structure (`src/calc/data.js`)
 
-3. `src/components/calculatorcomponent.js` — Single class component holding all UI state (`income`, `status`, `year`, `state`) and the derived `calculation` object. Calls `calculate()` on every state change (no debounce). Renders input, chip selectors, and results tables.
+- `w` — federal brackets, keyed by year → filing status (`s`/`m`) → `{deduction, brackets}`
+- `s` — state brackets, keyed by state code (`CA`, `NY`, `WA`, `TX`) → year → filing status → same shape
 
-4. `src/App.js` — Thin wrapper: sets up MUI `ThemeProvider` and renders `CalculatorComponent`.
+Each bracket object: `{ p: marginalRate, s: precomputedTaxForLowerBrackets }`. Bracket keys are the lower bound of income above the deduction.
 
-### Adding a new year's tax data
+### Calculation logic (`src/util/calcutil.js`)
 
-Add entries to both `w` (federal) and `s[state]` (for each supported state) in `src/calc/data.js`, following the existing bracket format. Also add the new year as a `<Chip>` in `calculatorcomponent.js`.
+`calculateProgressive(taxes, grossIncome, status, year)`:
+1. Subtract standard deduction → taxable income
+2. Walk bracket keys to find the applicable bracket
+3. Apply `tax = (incomeAboveBracketFloor × p) + s`
+
+The exported `calculate(g, status, year, state)` calls all sub-calculators and returns:
+```js
+{ fed, state, social, medicare, sdi, totals: { net, netMonthly, tax } }
+```
+
+FICA is hardcoded: Social Security at 6.2% capped at $8,239.80; Medicare at 1.45% (+ 0.9% above $200k). SDI is only applied for CA.
 
 ### Adding a new state
 
-Add the state's data under `s[STATE_CODE]` in `src/calc/data.js` (for all supported years), then add a `<Chip>` for it in `calculatorcomponent.js`.
+1. Add state brackets to `src/calc/data.js` under `s` (match the CA/NY shape)
+2. Add a `<Chip>` button in `calculatorcomponent.js` for the state selector
+3. If the state has SDI, add handling in `calculateSdi()` in `calcutil.js`
+
+### Adding a new tax year
+
+Add the year to both `w` (federal) and all state entries in `s` in `src/calc/data.js`, then add a `<Chip>` in the Year selector row in `calculatorcomponent.js`.
 
 ## Deployment
 
-The app is deployed via GitHub Actions to GitHub Pages (`gh-pages` branch). `npm run predeploy` (build) runs automatically before `npm run deploy`.
+Pushes to `master` auto-deploy via GitHub Actions (`.github/workflows/node.js.yml`) → `gh-pages` branch → thetax.us (custom domain via CNAME).
+
+To deploy manually, use the `/deploy` Claude skill or run:
+
+```bash
+NODE_OPTIONS=--openssl-legacy-provider npm run build && npm run deploy
+```
 
 ## Pull Requests
 
