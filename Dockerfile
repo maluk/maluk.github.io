@@ -28,10 +28,7 @@ FROM build AS agent
 # git, openssh: for git operations
 # shadow: for user management (optional if using alpine's adduser, but good for compatibility)
 # bash: used as shell
-RUN apk add --no-cache python3 git openssh bash
-
-# Install Claude CLI
-RUN npm install -g @anthropic-ai/claude-code
+RUN apk add --no-cache python3 git openssh bash curl github-cli
 
 # Install uv (Python package manager)
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
@@ -48,6 +45,12 @@ RUN (deluser node || true) && \
     chown agent:agent /app/state
 
 USER agent
+
+WORKDIR /home/agent
+RUN curl -fsSL https://claude.ai/install.sh | bash
+# Add `~/.local/bin` to PATH for the agent user
+ENV PATH="/home/agent/.local/bin:${PATH}"
+
 WORKDIR /home/agent/repository
 
 # Entrypoint for the agent
