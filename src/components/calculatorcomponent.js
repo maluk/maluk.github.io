@@ -1,7 +1,40 @@
 import React from 'react';
 
-import { ButtonGroup, Chip, InputLabel, FormControl, Container, CssBaseline, Avatar, Typography, TextField, Button, Grid, Table, TableHead, TableRow, TableBody, TableCell, InputAdornment, OutlinedInput } from '@material-ui/core';
+import { Chip, InputLabel, FormControl, Typography, Grid, Table, TableHead, TableRow, TableBody, TableCell, InputAdornment, OutlinedInput } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import { calculate } from '../util/calcutil'
+
+const useFaqStyles = makeStyles((theme) => ({
+  faqSection: {
+    marginTop: theme.spacing(4),
+    textAlign: 'left',
+  },
+  faqItem: {
+    marginTop: theme.spacing(2),
+  },
+}));
+
+function FaqSection({ faqs }) {
+  const classes = useFaqStyles();
+  if (!faqs || faqs.length === 0) return null;
+  return (
+    <div className={classes.faqSection}>
+      <Typography variant="h6" component="h2" gutterBottom>
+        Frequently Asked Questions
+      </Typography>
+      {faqs.map((faq, i) => (
+        <div key={i} className={classes.faqItem}>
+          <Typography variant="subtitle1" component="h3" style={{ fontWeight: 600 }}>
+            {faq.question}
+          </Typography>
+          <Typography variant="body2" color="textSecondary">
+            {faq.answer}
+          </Typography>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 class CalculatorComponent extends React.Component {
     constructor(props) {
@@ -25,12 +58,15 @@ class CalculatorComponent extends React.Component {
         this.handleYearClick = this.handleYearClick.bind(this);
         this.handleStateClick = this.handleStateClick.bind(this);
 
+        const initialState = props.initialState || 'CA';
+        const initialYear = props.initialYear || '2026';
+
         this.state = {
             income : 100000,
             status : 's',
-            year : '2026',
-            state : 'CA',
-            calculation : calculate(100000, 's', '2026', 'CA')
+            year : initialYear,
+            state : initialState,
+            calculation : calculate(100000, 's', initialYear, initialState)
         };
     }
 
@@ -66,15 +102,25 @@ class CalculatorComponent extends React.Component {
     }
 
     render() {
+      const { stateMeta } = this.props;
+      const pageHeading = stateMeta
+        ? `${stateMeta.name} Paycheck Tax Calculator`
+        : 'US Paycheck Tax Calculator';
+
       return (
-        <form className={this.props.useClasses.root} noValidate autoComplete="off">
+        <form className={this.props.useClasses && this.props.useClasses.root} noValidate autoComplete="off">
             <Grid container spacing={2}>
                 <Grid item xs={12}>
-                    <Typography variant="h5" align={'center'}>US Paycheck Tax Calculator</Typography>
+                    <Typography variant="h5" component="h1" align={'center'}>
+                        {pageHeading}
+                    </Typography>
+                    <Typography variant="caption" align={'center'} display="block" color="textSecondary">
+                        {this.state.year}
+                    </Typography>
                 </Grid>
                 <Grid item xs={12}>
-                    <FormControl fullWidth className={this.props.useClasses.margin} variant="outlined">
-                        <InputLabel htmlFor="outlined-adornment-amount">Annual Income Amount</InputLabel>
+                    <FormControl fullWidth variant="outlined">
+                        <InputLabel htmlFor="outlined-income-amount">Annual Income Amount</InputLabel>
                         <OutlinedInput
                             id="outlined-income-amount"
                             value={this.state.income}
@@ -228,6 +274,16 @@ class CalculatorComponent extends React.Component {
                         </TableBody>
                     </Table>
                 </Grid>
+                <Grid item xs={12}>
+                    <Typography variant="caption" style={{ marginTop: '24px', color: '#9e9e9e', textAlign: 'center', display: 'block' }}>
+                        Calculations are approximate and for the exact numbers I recommend to contact a tax specialist.
+                    </Typography>
+                </Grid>
+                {stateMeta && stateMeta.faqs && (
+                    <Grid item xs={12}>
+                        <FaqSection faqs={stateMeta.faqs} />
+                    </Grid>
+                )}
             </Grid>
         </form>
       );

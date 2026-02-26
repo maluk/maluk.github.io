@@ -1,50 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>US Paycheck Tax Calculator</title>
-    <meta name="description" content="Effortlessly calculate your paycheck taxes with Paycheck Tax Calculator! Our easy and reliable tool ensures accurate tax withholdings for employees, freelancers, and employers. Gain financial clarity without the hassle. Try it now!"/>
+    <title>US Paycheck Tax Calculator 2026 | thetax.us</title>
+    <meta name="description" content="Free US paycheck tax calculator for 2026. Calculate federal income tax, Social Security, Medicare, and state taxes for California, New York, Texas, and Washington. No signup required."/>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
 
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://thetax.us/" />
+    <meta property="og:title" content="US Paycheck Tax Calculator 2026 | thetax.us" />
+    <meta property="og:description" content="Free US paycheck tax calculator for 2026. Calculate federal income tax, Social Security, Medicare, and state taxes. No signup required." />
+    <meta property="og:site_name" content="thetax.us" />
 
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-37081835-2"></script>
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:url" content="https://thetax.us/" />
+    <meta name="twitter:title" content="US Paycheck Tax Calculator 2026 | thetax.us" />
+    <meta name="twitter:description" content="Free US paycheck tax calculator for 2026. Calculate your take-home pay for CA, NY, TX, WA. No signup required." />
+
+    <!-- GitHub Pages SPA redirect handler -->
+    <script>
+      (function(l) {
+        if (l.search[1] === '/' ) {
+          var decoded = l.search.slice(1).split('&').map(function(s) {
+            return s.replace(/~and~/g, '&')
+          }).join('?');
+          window.history.replaceState(null, null,
+            l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+      }(window.location))
+    </script>
+
+    <!-- Google Analytics 4 -->
+    <!-- TODO: Replace GA4_MEASUREMENT_ID with your actual GA4 ID from Google Analytics -->
+    <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=GA4_MEASUREMENT_ID"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
-      gtag('config', 'UA-37081835-2');
-    </script>
+      gtag('config', 'GA4_MEASUREMENT_ID');
+    </script> -->
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
-
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
-
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
   </body>
 </html>
