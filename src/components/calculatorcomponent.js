@@ -3,6 +3,7 @@ import React from 'react';
 import { Chip, InputLabel, FormControl, Typography, Grid, Table, TableHead, TableRow, TableBody, TableCell, InputAdornment, OutlinedInput } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { calculate } from '../util/calcutil'
+import { CURRENT_YEAR } from '../seoConfig'
 
 const useFaqStyles = makeStyles((theme) => ({
   faqSection: {
@@ -59,7 +60,7 @@ class CalculatorComponent extends React.Component {
         this.handleStateClick = this.handleStateClick.bind(this);
 
         const initialState = props.initialState || 'CA';
-        const initialYear = props.initialYear || '2026';
+        const initialYear = props.initialYear || CURRENT_YEAR;
 
         this.state = {
             income : 100000,
