@@ -1,0 +1,15 @@
+board_id: QxkW6V72
+agent: macBot
+api_url: https://app.kardbrd.com
+
+rules:
+  - name: Deploy on box reaction
+    event: reaction_added
+    emoji: "📦"
+    require_user: "AN468Oye"
+    model: sonnet
+    action: |
+      The operator approved deployment with a 📦 reaction.
+      Merge the open PR using `gh pr merge --merge --auto` (or the appropriate
+      PR number if known), then run /deploy to build and publish the app to
+      GitHub Pages.
