@@ -63,3 +63,19 @@ Add the year to both `w` (federal) and all state entries in `s` in `src/calc/dat
 ## Deployment
 
 Pushes to `master` auto-deploy via GitHub Actions (`.github/workflows/node.js.yml`) → `gh-pages` branch → thetax.us (custom domain via CNAME).
+
+To deploy manually, use the `/deploy` Claude skill or run:
+
+```bash
+NODE_OPTIONS=--openssl-legacy-provider npm run build && npm run deploy
+```
+
+## Pull Requests
+
+Use the `gh` CLI to create pull requests:
+
+```bash
+gh pr create --title "your title" --body "description"
+```
+
+Always create a new branch before opening a PR — never commit directly to `master`.
