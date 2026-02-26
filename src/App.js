@@ -56,6 +56,15 @@ function PageContent({ darkMode, onToggle, stateCode, year }) {
     })),
   } : null;
 
+  const breadcrumbSchema = stateMeta ? {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://thetax.us/' },
+      { '@type': 'ListItem', position: 2, name: stateMeta.name, item: canonicalUrl },
+    ],
+  } : null;
+
   return (
     <>
       <Helmet>
@@ -68,10 +77,13 @@ function PageContent({ darkMode, onToggle, stateCode, year }) {
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />
 
+        <meta property="og:image" content="https://thetax.us/logo512.png" />
+
         <meta name="twitter:card" content="summary" />
         <meta name="twitter:url" content={canonicalUrl} />
         <meta name="twitter:title" content={pageTitle} />
         <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:image" content="https://thetax.us/logo512.png" />
 
         <script type="application/ld+json">
           {JSON.stringify(schemaOrg)}
@@ -79,6 +91,11 @@ function PageContent({ darkMode, onToggle, stateCode, year }) {
         {faqSchema && (
           <script type="application/ld+json">
             {JSON.stringify(faqSchema)}
+          </script>
+        )}
+        {breadcrumbSchema && (
+          <script type="application/ld+json">
+            {JSON.stringify(breadcrumbSchema)}
           </script>
         )}
       </Helmet>

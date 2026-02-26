@@ -8,6 +8,8 @@ export const STATE_META = {
     getTitle: (year) => `California Paycheck Tax Calculator ${year} | thetax.us`,
     getDescription: (year) =>
       `Calculate your California take-home pay for ${year}. Includes CA state income tax, SDI, Social Security, and Medicare. Free, no signup required.`,
+    getIntro: (year) =>
+      `Enter your annual salary to see your California take-home pay for ${year}. The calculator accounts for federal income tax, California state income tax (1%–13.3%), SDI, Social Security, and Medicare.`,
     faqs: [
       {
         question: 'Does California have state income tax?',
@@ -34,6 +36,16 @@ export const STATE_META = {
         answer:
           `Texas has no state income tax, while California imposes rates up to 13.3%. On a $100,000 salary in ${CURRENT_YEAR}, you can expect to take home roughly $7,000–$10,000 more per year in Texas than in California.`,
       },
+      {
+        question: `How much do I take home on a $100,000 salary in California for ${CURRENT_YEAR}?`,
+        answer:
+          `On a $100,000 gross salary in California for ${CURRENT_YEAR}, a single filer takes home approximately $71,000–$73,000 per year after federal income tax, California state income tax, SDI, Social Security, and Medicare. Use the calculator above for your exact amount.`,
+      },
+      {
+        question: `How much do I take home on a $150,000 salary in California for ${CURRENT_YEAR}?`,
+        answer:
+          `On a $150,000 gross salary in California for ${CURRENT_YEAR}, a single filer takes home approximately $98,000–$102,000 per year. California's high marginal state tax rates and SDI make the effective rate one of the highest in the US. Use the calculator above for your precise figure.`,
+      },
     ],
   },
   NY: {
@@ -43,6 +55,8 @@ export const STATE_META = {
     getTitle: (year) => `New York Paycheck Tax Calculator ${year} | thetax.us`,
     getDescription: (year) =>
       `Calculate your New York take-home pay for ${year}. Includes NY state income tax, Social Security, and Medicare. Free, no signup required.`,
+    getIntro: (year) =>
+      `Enter your annual salary to see your New York take-home pay for ${year}. The calculator accounts for federal income tax, New York state income tax (4%–10.9%), Social Security, and Medicare.`,
     faqs: [
       {
         question: 'Does New York have state income tax?',
@@ -64,6 +78,16 @@ export const STATE_META = {
         answer:
           'Both states have high income taxes. New York tops out at 10.9% while California tops at 13.3%. For most incomes, California residents pay somewhat more in state taxes, but the difference varies by income level.',
       },
+      {
+        question: `How much do I take home on a $100,000 salary in New York for ${CURRENT_YEAR}?`,
+        answer:
+          `On a $100,000 gross salary in New York for ${CURRENT_YEAR}, a single filer takes home approximately $72,000–$74,000 per year after federal and state income taxes, Social Security, and Medicare. Use the calculator above for your exact amount.`,
+      },
+      {
+        question: `How much do I take home on a $75,000 salary in New York for ${CURRENT_YEAR}?`,
+        answer:
+          `On a $75,000 gross salary in New York for ${CURRENT_YEAR}, a single filer takes home approximately $55,000–$57,000 per year after all taxes. Use the calculator above to see the full breakdown.`,
+      },
     ],
   },
   TX: {
@@ -73,6 +97,8 @@ export const STATE_META = {
     getTitle: (year) => `Texas Paycheck Tax Calculator ${year} | thetax.us`,
     getDescription: (year) =>
       `Calculate your Texas take-home pay for ${year}. Texas has no state income tax. Includes federal taxes, Social Security, and Medicare. Free, no signup required.`,
+    getIntro: (year) =>
+      `Enter your annual salary to see your Texas take-home pay for ${year}. Texas has no state income tax, so deductions are limited to federal income tax, Social Security, and Medicare.`,
     faqs: [
       {
         question: 'Does Texas have state income tax?',
@@ -94,6 +120,16 @@ export const STATE_META = {
         answer:
           `On a $100,000 salary in ${CURRENT_YEAR}, Texas residents generally take home $5,000–$8,000 more per year than New York residents because Texas has no state income tax.`,
       },
+      {
+        question: `How much do I take home on a $100,000 salary in Texas for ${CURRENT_YEAR}?`,
+        answer:
+          `On a $100,000 gross salary in Texas for ${CURRENT_YEAR}, a single filer takes home approximately $78,000–$80,000 per year. With no state income tax, Texas residents keep significantly more of their paycheck than in most states. Use the calculator above for your exact amount.`,
+      },
+      {
+        question: `How much do I take home on an $80,000 salary in Texas for ${CURRENT_YEAR}?`,
+        answer:
+          `On an $80,000 gross salary in Texas for ${CURRENT_YEAR}, a single filer takes home approximately $62,000–$64,000 per year after federal income tax, Social Security, and Medicare. Use the calculator above for a full breakdown.`,
+      },
     ],
   },
   WA: {
@@ -103,6 +139,8 @@ export const STATE_META = {
     getTitle: (year) => `Washington State Paycheck Tax Calculator ${year} | thetax.us`,
     getDescription: (year) =>
       `Calculate your Washington state take-home pay for ${year}. Washington has no state income tax. Includes federal taxes, Social Security, and Medicare. Free, no signup required.`,
+    getIntro: (year) =>
+      `Enter your annual salary to see your Washington state take-home pay for ${year}. Washington has no state income tax, so deductions are limited to federal income tax, Social Security, and Medicare.`,
     faqs: [
       {
         question: 'Does Washington state have state income tax?',
@@ -119,6 +157,16 @@ export const STATE_META = {
         answer:
           'Washington has no state income tax while California imposes rates up to 13.3%. On a $100,000 salary, Washington residents typically take home $7,000–$10,000 more per year than Californians.',
       },
+      {
+        question: `How much do I take home on a $100,000 salary in Washington state for ${CURRENT_YEAR}?`,
+        answer:
+          `On a $100,000 gross salary in Washington state for ${CURRENT_YEAR}, a single filer takes home approximately $78,000–$80,000 per year. Like Texas, Washington has no state income tax, so only federal taxes apply. Use the calculator above for your exact amount.`,
+      },
+      {
+        question: `How much do I take home on a $120,000 salary in Washington for ${CURRENT_YEAR}?`,
+        answer:
+          `On a $120,000 gross salary in Washington for ${CURRENT_YEAR}, a single filer takes home approximately $91,000–$94,000 per year after federal income tax, Social Security, and Medicare. Use the calculator above for a full breakdown.`,
+      },
     ],
   },
 };
@@ -131,6 +179,8 @@ export const DEFAULT_META = {
   getTitle: (year) => `US Paycheck Tax Calculator ${year} | thetax.us`,
   getDescription: (year) =>
     `Free US paycheck tax calculator for ${year}. Calculate federal income tax, Social Security, Medicare, and state taxes for California, New York, Texas, and Washington. No signup required.`,
+  getIntro: (year) =>
+    `Enter your annual salary to calculate your US take-home pay for ${year}. See your federal income tax, state income tax, Social Security, and Medicare deductions broken down in real time.`,
 };
 
 export const SCHEMA_ORG_BASE = {
