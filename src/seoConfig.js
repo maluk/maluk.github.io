@@ -1,4 +1,4 @@
-export const CURRENT_YEAR = '2026';
+export const CURRENT_YEAR = String(new Date().getFullYear());
 
 export const STATE_META = {
   CA: {
@@ -12,17 +12,17 @@ export const STATE_META = {
       {
         question: 'Does California have state income tax?',
         answer:
-          'Yes. California has a progressive state income tax with rates ranging from 1% to 13.3% for 2026, making it one of the highest in the US.',
+          `Yes. California has a progressive state income tax with rates ranging from 1% to 13.3% for ${CURRENT_YEAR}, making it one of the highest in the US.`,
       },
       {
-        question: 'What is the California SDI rate for 2026?',
+        question: `What is the California SDI rate for ${CURRENT_YEAR}?`,
         answer:
-          'The California State Disability Insurance (SDI) rate for 2026 is 1.1% on all wages. There is no wage cap, meaning SDI applies to your full gross income.',
+          `The California State Disability Insurance (SDI) rate for ${CURRENT_YEAR} is 1.1% on all wages. There is no wage cap, meaning SDI applies to your full gross income.`,
       },
       {
-        question: 'What is the California standard deduction for 2026?',
+        question: `What is the California standard deduction for ${CURRENT_YEAR}?`,
         answer:
-          'The California standard deduction for single filers is $6,000 for 2026. For married filing jointly, it is $12,000.',
+          `The California standard deduction for single filers is $6,000 for ${CURRENT_YEAR}. For married filing jointly, it is $12,000.`,
       },
       {
         question: 'What taxes are taken out of a California paycheck?',
@@ -32,7 +32,7 @@ export const STATE_META = {
       {
         question: 'How does California compare to Texas for take-home pay?',
         answer:
-          'Texas has no state income tax, while California imposes rates up to 13.3%. On a $100,000 salary in 2026, you can expect to take home roughly $7,000–$10,000 more per year in Texas than in California.',
+          `Texas has no state income tax, while California imposes rates up to 13.3%. On a $100,000 salary in ${CURRENT_YEAR}, you can expect to take home roughly $7,000–$10,000 more per year in Texas than in California.`,
       },
     ],
   },
@@ -47,12 +47,12 @@ export const STATE_META = {
       {
         question: 'Does New York have state income tax?',
         answer:
-          'Yes. New York has a progressive state income tax with rates ranging from 4% to 10.9% for 2026.',
+          `Yes. New York has a progressive state income tax with rates ranging from 4% to 10.9% for ${CURRENT_YEAR}.`,
       },
       {
-        question: 'What is the New York standard deduction for 2026?',
+        question: `What is the New York standard deduction for ${CURRENT_YEAR}?`,
         answer:
-          'The New York standard deduction for single filers is $8,000 for 2026. For married filing jointly, it is $16,050.',
+          `The New York standard deduction for single filers is $8,000 for ${CURRENT_YEAR}. For married filing jointly, it is $16,050.`,
       },
       {
         question: 'What taxes are taken out of a New York paycheck?',
@@ -87,12 +87,12 @@ export const STATE_META = {
       {
         question: 'How much more do I take home in Texas vs. California?',
         answer:
-          'On a $100,000 salary in 2026, Texas residents take home roughly $7,000–$10,000 more per year than California residents due to the absence of state income tax.',
+          `On a $100,000 salary in ${CURRENT_YEAR}, Texas residents take home roughly $7,000–$10,000 more per year than California residents due to the absence of state income tax.`,
       },
       {
         question: 'How much more do I take home in Texas vs. New York?',
         answer:
-          'On a $100,000 salary in 2026, Texas residents generally take home $5,000–$8,000 more per year than New York residents because Texas has no state income tax.',
+          `On a $100,000 salary in ${CURRENT_YEAR}, Texas residents generally take home $5,000–$8,000 more per year than New York residents because Texas has no state income tax.`,
       },
     ],
   },
