@@ -5,9 +5,9 @@ export const STATE_META = {
     slug: 'california',
     name: 'California',
     code: 'CA',
-    getTitle: (year) => `California Paycheck Tax Calculator ${year} | thetax.us`,
+    getTitle: (year) => `California Take-Home Pay Calculator ${year} — See Your Exact Pay`,
     getDescription: (year) =>
-      `Calculate your California take-home pay for ${year}. Includes CA state income tax, SDI, Social Security, and Medicare. Free, no signup required.`,
+      `On $100K in California, you keep ~$72K after taxes. Enter your salary to instantly see your ${year} CA take-home pay with federal, state, SDI & FICA breakdown.`,
     getIntro: (year) =>
       `Enter your annual salary to see your California take-home pay for ${year}. The calculator accounts for federal income tax, California state income tax (1%–13.3%), SDI, Social Security, and Medicare.`,
     faqs: [
@@ -52,9 +52,9 @@ export const STATE_META = {
     slug: 'new-york',
     name: 'New York',
     code: 'NY',
-    getTitle: (year) => `New York Paycheck Tax Calculator ${year} | thetax.us`,
+    getTitle: (year) => `New York Take-Home Pay Calculator ${year} — See Your Exact Pay`,
     getDescription: (year) =>
-      `Calculate your New York take-home pay for ${year}. Includes NY state income tax, Social Security, and Medicare. Free, no signup required.`,
+      `On $100K in New York, you keep ~$73K after taxes. Enter your salary to instantly see your ${year} NY take-home pay with federal, state & FICA breakdown.`,
     getIntro: (year) =>
       `Enter your annual salary to see your New York take-home pay for ${year}. The calculator accounts for federal income tax, New York state income tax (4%–10.9%), Social Security, and Medicare.`,
     faqs: [
@@ -94,9 +94,9 @@ export const STATE_META = {
     slug: 'texas',
     name: 'Texas',
     code: 'TX',
-    getTitle: (year) => `Texas Paycheck Tax Calculator ${year} | thetax.us`,
+    getTitle: (year) => `Texas Take-Home Pay Calculator ${year} — No State Tax`,
     getDescription: (year) =>
-      `Calculate your Texas take-home pay for ${year}. Texas has no state income tax. Includes federal taxes, Social Security, and Medicare. Free, no signup required.`,
+      `On $100K in Texas, you keep ~$79K — no state income tax. Enter your salary to instantly see your ${year} TX take-home pay with federal & FICA breakdown.`,
     getIntro: (year) =>
       `Enter your annual salary to see your Texas take-home pay for ${year}. Texas has no state income tax, so deductions are limited to federal income tax, Social Security, and Medicare.`,
     faqs: [
@@ -136,9 +136,9 @@ export const STATE_META = {
     slug: 'washington',
     name: 'Washington',
     code: 'WA',
-    getTitle: (year) => `Washington State Paycheck Tax Calculator ${year} | thetax.us`,
+    getTitle: (year) => `Washington Take-Home Pay Calculator ${year} — No State Tax`,
     getDescription: (year) =>
-      `Calculate your Washington state take-home pay for ${year}. Washington has no state income tax. Includes federal taxes, Social Security, and Medicare. Free, no signup required.`,
+      `On $100K in Washington, you keep ~$79K — no state income tax. Enter your salary to instantly see your ${year} WA take-home pay with federal & FICA breakdown.`,
     getIntro: (year) =>
       `Enter your annual salary to see your Washington state take-home pay for ${year}. Washington has no state income tax, so deductions are limited to federal income tax, Social Security, and Medicare.`,
     faqs: [
@@ -176,9 +176,9 @@ export const SLUG_TO_STATE = Object.fromEntries(
 );
 
 export const DEFAULT_META = {
-  getTitle: (year) => `US Paycheck Tax Calculator ${year} | thetax.us`,
+  getTitle: (year) => `US Take-Home Pay Calculator ${year} — Instant Results`,
   getDescription: (year) =>
-    `Free US paycheck tax calculator for ${year}. Calculate federal income tax, Social Security, Medicare, and state taxes for California, New York, Texas, and Washington. No signup required.`,
+    `See exactly how much you keep after taxes in ${year}. Enter your salary for an instant breakdown of federal, state, Social Security & Medicare deductions. Free, no signup.`,
   getIntro: (year) =>
     `Enter your annual salary to calculate your US take-home pay for ${year}. See your federal income tax, state income tax, Social Security, and Medicare deductions broken down in real time.`,
 };
