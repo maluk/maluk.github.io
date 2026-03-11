@@ -359,6 +359,56 @@ export const s = {
       }
     }
   },
+  FL: {
+    2024: {
+      s: {
+        deduction: 0,
+        brackets: {
+          0: { p: 0.0, s: 0.0 },
+          1: { p: 0.0, s: 0.0 },
+        },
+      },
+      m: {
+        deduction: 0,
+        brackets: {
+          0: { p: 0.0, s: 0.0 },
+          1: { p: 0.0, s: 0.0 },
+        },
+      },
+    },
+    2025: {
+      s: {
+        deduction: 0,
+        brackets: {
+          0: { p: 0.0, s: 0.0 },
+          1: { p: 0.0, s: 0.0 },
+        },
+      },
+      m: {
+        deduction: 0,
+        brackets: {
+          0: { p: 0.0, s: 0.0 },
+          1: { p: 0.0, s: 0.0 },
+        },
+      },
+    },
+    2026: {
+      s: {
+        deduction: 0,
+        brackets: {
+          0: { p: 0.0, s: 0.0 },
+          1: { p: 0.0, s: 0.0 },
+        },
+      },
+      m: {
+        deduction: 0,
+        brackets: {
+          0: { p: 0.0, s: 0.0 },
+          1: { p: 0.0, s: 0.0 },
+        },
+      },
+    },
+  },
   TX: {
     2024: {
       s: {

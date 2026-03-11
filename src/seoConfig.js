@@ -90,6 +90,48 @@ export const STATE_META = {
       },
     ],
   },
+  FL: {
+    slug: 'florida',
+    name: 'Florida',
+    code: 'FL',
+    getTitle: (year) => `Florida Take-Home Pay Calculator ${year} — No State Tax`,
+    getDescription: (year) =>
+      `On $100K in Florida, you keep ~$79K — no state income tax. Enter your salary to instantly see your ${year} FL take-home pay with federal & FICA breakdown.`,
+    getIntro: (year) =>
+      `Enter your annual salary to see your Florida take-home pay for ${year}. Florida has no state income tax, so deductions are limited to federal income tax, Social Security, and Medicare.`,
+    faqs: [
+      {
+        question: 'Does Florida have state income tax?',
+        answer:
+          'No. Florida has no state income tax, making it one of the most tax-friendly states for workers. Your paycheck deductions are limited to federal income tax, Social Security, and Medicare.',
+      },
+      {
+        question: 'What taxes are taken out of a Florida paycheck?',
+        answer:
+          'A Florida paycheck only has federal income tax, Social Security (6.2% up to a cap), and Medicare (1.45%) withheld. There is no Florida state income tax.',
+      },
+      {
+        question: 'How much more do I take home in Florida vs. California?',
+        answer:
+          `On a $100,000 salary in ${CURRENT_YEAR}, Florida residents take home roughly $7,000–$10,000 more per year than California residents due to the absence of state income tax.`,
+      },
+      {
+        question: 'How much more do I take home in Florida vs. New York?',
+        answer:
+          `On a $100,000 salary in ${CURRENT_YEAR}, Florida residents generally take home $5,000–$8,000 more per year than New York residents because Florida has no state income tax.`,
+      },
+      {
+        question: `How much do I take home on a $100,000 salary in Florida for ${CURRENT_YEAR}?`,
+        answer:
+          `On a $100,000 gross salary in Florida for ${CURRENT_YEAR}, a single filer takes home approximately $78,000–$80,000 per year. With no state income tax, Florida residents keep significantly more of their paycheck than in most states. Use the calculator above for your exact amount.`,
+      },
+      {
+        question: `How much do I take home on an $80,000 salary in Florida for ${CURRENT_YEAR}?`,
+        answer:
+          `On an $80,000 gross salary in Florida for ${CURRENT_YEAR}, a single filer takes home approximately $62,000–$64,000 per year after federal income tax, Social Security, and Medicare. Use the calculator above for a full breakdown.`,
+      },
+    ],
+  },
   TX: {
     slug: 'texas',
     name: 'Texas',
