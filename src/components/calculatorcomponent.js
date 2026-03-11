@@ -9,6 +9,7 @@ import { CURRENT_YEAR, STATE_META, DEFAULT_META } from '../seoConfig'
 const STATE_CHIPS = [
   { code: 'CA', slug: 'california' },
   { code: 'NY', slug: 'new-york' },
+  { code: 'FL', slug: 'florida' },
   { code: 'WA', slug: 'washington' },
   { code: 'TX', slug: 'texas' },
 ];
