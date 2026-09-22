@@ -22,7 +22,7 @@ export function comparePayFrequencies(input: PaycheckInput): Record<PayFrequency
     try {
       return [frequency, calculatePaycheck({ ...input, payFrequency: frequency, compensation })];
     } catch (error) {
-      if (frequency === input.payFrequency) throw error;
+      if (frequency === input.payFrequency || !(error instanceof Error) || !['Deductions exceed gross pay', 'Withholding and deductions exceed gross pay'].includes(error.message)) throw error;
       return [frequency, undefined];
     }
   })) as Record<PayFrequency, PaycheckResult | undefined>;
