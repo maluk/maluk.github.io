@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Deduction, DeductionTaxTreatment, PaycheckInput, PaycheckResult } from '../calculator/types.ts';
 import { calculatePaycheck } from '../calculator/index.ts';
+import { comparePayFrequencies, periodsPerYear } from '../calculator/periods.ts';
 import { currency, wholeCurrency } from '../site/format.ts';
 import { verifiedStatePages } from '../site/states.ts';
 import { stateCalculators } from '../calculator/states/index.ts';
@@ -14,7 +15,6 @@ function track(event: string, data?: Record<string, string>) {
   w.umami?.track(event, data);
 }
 
-const periodCount = { weekly: 52, biweekly: 26, semimonthly: 24, monthly: 12 };
 const statusLabels = { single: 'Single', married_joint: 'Married filing jointly', married_separate: 'Married filing separately', head_of_household: 'Head of household' };
 const deductionLabels: Record<Deduction['kind'], string> = { '401k': 'Traditional 401(k)', hsa: 'HSA', fsa: 'FSA', health: 'Health insurance', dental: 'Dental', vision: 'Vision', custom: 'Custom deduction' };
 const noReduction: DeductionTaxTreatment = { federalIncomeTax: false, socialSecurity: false, medicare: false, stateIncomeTax: false, localIncomeTax: false };
@@ -37,6 +37,7 @@ export function Calculator({ initialInput, initialResult }: { initialInput: Payc
   const [input, setInput] = useState(initialInput);
   const [advanced, setAdvanced] = useState(false);
   const [newDeduction, setNewDeduction] = useState<Deduction['kind']>('401k');
+  const [shareStatus, setShareStatus] = useState('');
   const started = useRef(false);
   const resultRef = useRef<HTMLDivElement>(null);
   const calculated = useMemo(() => {
@@ -44,8 +45,10 @@ export function Calculator({ initialInput, initialResult }: { initialInput: Payc
     catch (error) { return { result: initialResult, error: error instanceof Error ? error.message : 'Calculation unavailable' }; }
   }, [input, initialResult]);
   const { result, error } = calculated;
+  const periodResults = useMemo(() => error ? undefined : comparePayFrequencies(input), [input, error]);
   const update = (next: PaycheckInput) => {
     if (!started.current) { track('calculator_started'); started.current = true; }
+    setShareStatus('');
     setInput(next);
   };
   const updateFederal = (key: keyof PaycheckInput['federal'], value: string | number | boolean) => update({ ...input, federal: { ...input.federal, [key]: value } });
@@ -58,6 +61,18 @@ export function Calculator({ initialInput, initialResult }: { initialInput: Payc
   };
   const updateDeduction = (id: string, change: Partial<Deduction>) => update({ ...input, deductions: input.deductions.map(deduction => deduction.id === id ? { ...deduction, ...change } : deduction) });
   const submit = () => { if (!error) { track('calculator_completed', { state: input.location.state, frequency: input.payFrequency }); resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); } };
+  const shareResult = async () => {
+    const stateName = verifiedStatePages.find(page => page.code === input.location.state)?.name ?? input.location.state;
+    const summary = `${stateName} estimated ${input.payFrequency} take-home pay: ${currency(result.netPay)} from ${currency(result.grossPay)} gross. Estimated paycheck — not tax advice.`;
+    try {
+      if (navigator.share) await navigator.share({ title: 'TheTax.us paycheck estimate', text: summary, url: window.location.href });
+      else { await navigator.clipboard.writeText(`${summary} ${window.location.href}`); setShareStatus('Result copied to clipboard.'); }
+      track('result_shared', { state: input.location.state, frequency: input.payFrequency });
+    } catch (shareError) {
+      if (shareError instanceof DOMException && shareError.name === 'AbortError') return;
+      setShareStatus('Sharing is unavailable in this browser.');
+    }
+  };
   const percent = result.grossPay > 0 ? Math.round(result.netPay / result.grossPay * 100) : 0;
   const deductions = result.deductions.filter(item => item.amount > 0);
   const rows = [
@@ -89,6 +104,10 @@ export function Calculator({ initialInput, initialResult }: { initialInput: Payc
         {input.location.state === 'CA' && <><h3>California DE 4</h3><div className="field-row"><InputField label="Regular allowances" prefix="" step="1" value={Number(input.stateOptions?.caAllowances ?? 0)} onChange={value => updateStateOption('caAllowances', value)} /><InputField label="Estimated deduction allowances" prefix="" step="1" value={Number(input.stateOptions?.caDeductionAllowances ?? 0)} onChange={value => updateStateOption('caDeductionAllowances', value)} /></div><InputField label="Extra CA withholding" value={Number(input.stateOptions?.caExtraWithholding ?? 0)} onChange={value => updateStateOption('caExtraWithholding', value)} /></>}
         {input.location.state === 'IL' && <><h3>Illinois IL-W-4</h3><div className="field-row"><InputField label="Line 1 allowances" prefix="" step="1" value={Number(input.stateOptions?.ilLine1Allowances ?? 0)} onChange={value => updateStateOption('ilLine1Allowances', value)} /><InputField label="Line 2 allowances" prefix="" step="1" value={Number(input.stateOptions?.ilLine2Allowances ?? 0)} onChange={value => updateStateOption('ilLine2Allowances', value)} /></div><InputField label="Extra Illinois withholding" value={Number(input.stateOptions?.ilExtraWithholding ?? 0)} onChange={value => updateStateOption('ilExtraWithholding', value)} /></>}
         {input.location.state === 'IN' && <><h3>Indiana WH-4</h3><div className="field-row"><InputField label="Personal exemptions" prefix="" step="1" value={Number(input.stateOptions?.inPersonalExemptions ?? 0)} onChange={value => updateStateOption('inPersonalExemptions', value)} /><InputField label="Dependent exemptions" prefix="" step="1" value={Number(input.stateOptions?.inDependentExemptions ?? 0)} onChange={value => updateStateOption('inDependentExemptions', value)} /></div><div className="field-row"><InputField label="First-time dependent exemptions" prefix="" step="1" value={Number(input.stateOptions?.inFirstTimeDependentExemptions ?? 0)} onChange={value => updateStateOption('inFirstTimeDependentExemptions', value)} /><InputField label="Adopted child exemptions" prefix="" step="1" value={Number(input.stateOptions?.inAdoptedExemptions ?? 0)} onChange={value => updateStateOption('inAdoptedExemptions', value)} /></div><p className="help">Indiana county income tax is not included.</p></>}
+        {input.location.state === 'MI' && <><h3>Michigan MI-W4</h3><InputField label="Personal and dependency exemptions" prefix="" step="1" value={Number(input.stateOptions?.miExemptions ?? 0)} onChange={value => updateStateOption('miExemptions', value)} /><p className="help">Michigan city income taxes are not included.</p></>}
+        {input.location.state === 'NC' && <><h3>North Carolina NC-4</h3><InputField label="Withholding allowances" prefix="" step="1" value={Number(input.stateOptions?.ncAllowances ?? 0)} onChange={value => updateStateOption('ncAllowances', value)} /></>}
+        {input.location.state === 'GA' && <><h3>Georgia G-4</h3><InputField label="Dependent allowances" prefix="" step="1" value={Number(input.stateOptions?.gaDependents ?? 0)} onChange={value => updateStateOption('gaDependents', value)} /><label className="checkbox"><input type="checkbox" checked={!!input.stateOptions?.gaBothSpousesWorking} onChange={event => updateStateOption('gaBothSpousesWorking', event.target.checked)} />Both spouses work (married filing jointly)</label></>}
+        {input.location.state === 'AZ' && <><h3>Arizona A-4</h3><label className="field"><span>Withholding election</span><select value={Number(input.stateOptions?.azWithholdingRate ?? .02)} onChange={event => updateStateOption('azWithholdingRate', Number(event.target.value))}>{[0, 0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035].map(rate => <option key={rate} value={rate}>{(rate * 100).toFixed(1)}%</option>)}</select></label><InputField label="Extra Arizona withholding" value={Number(input.stateOptions?.azExtraWithholding ?? 0)} onChange={value => updateStateOption('azExtraWithholding', value)} /></>}
         {input.location.state === 'NY' && <><h3>New York IT-2104</h3><div className="field-row"><InputField label="Allowances" prefix="" step="1" value={Number(input.stateOptions?.nyAllowances ?? 0)} onChange={value => updateStateOption('nyAllowances', value)} /><InputField label="Extra NY withholding" value={Number(input.stateOptions?.nyExtraWithholding ?? 0)} onChange={value => updateStateOption('nyExtraWithholding', value)} /></div><label className="field"><span>City</span><select value={input.location.city ?? ''} onChange={event => update({ ...input, location: { ...input.location, city: event.target.value || undefined } })}><option value="">Outside NYC and Yonkers</option><option value="New York City">New York City</option><option value="Yonkers">Yonkers</option></select></label><label className="checkbox"><input type="checkbox" checked={!!input.stateOptions?.nyPflNotCovered} onChange={event => updateStateOption('nyPflNotCovered', event.target.checked)} />Paid Family Leave does not cover this job</label><InputField label="YTD Paid Family Leave contributions" value={input.ytd?.payrollContributions?.['ny-pfl'] ?? 0} onChange={value => update({ ...input, ytd: { ...input.ytd, payrollContributions: { ...input.ytd?.payrollContributions, 'ny-pfl': value } } })} /></>}
         {input.location.state === 'WA' && <><h3>Washington programs</h3><label className="checkbox"><input type="checkbox" checked={!!input.stateOptions?.waCaresExempt} onChange={event => updateStateOption('waCaresExempt', event.target.checked)} />I have an approved WA Cares exemption</label></>}
       </div>}
@@ -96,13 +115,16 @@ export function Calculator({ initialInput, initialResult }: { initialInput: Payc
       <button type="button" className="calculate-button" onClick={submit} disabled={!!error}>Calculate my paycheck <span>→</span></button>
     </section>
     <section className="calculator-card result-card" ref={resultRef} aria-label="Estimated paycheck">
+      {error ? <div className="result-unavailable" role="status"><p className="eyebrow">Your estimated paycheck</p><h2>Calculation unavailable</h2><p>Correct the input shown on the left to see an updated paycheck.</p></div> : <>
       <div className="card-heading"><span className="step">02</span><div><p className="eyebrow">Your estimated paycheck</p><h2>{wholeCurrency(result.netPay)} <small>take-home</small></h2></div></div>
       <div className="result-lines"><ResultLine label="Gross pay" amount={result.grossPay} gross /><p className="line-heading">Taxes &amp; payroll deductions</p>{rows.map(row => <ResultLine key={row.label} label={row.label} amount={row.amount} />)}{result.state.payrollDeductions.filter(row => row.amount > 0).map(row => <ResultLine key={row.id} label={row.label} amount={row.amount} />)}{deductions.map(row => <ResultLine key={row.id} label={row.label} amount={row.amount} />)}<div className="net-line"><span>Net pay</span><strong>{currency(result.netPay)}</strong></div></div>
       <div className="keep-callout">You keep approximately <strong>{percent}¢</strong> of every $1 of gross pay.</div>
-      <div className="periods">{Object.entries({ Weekly: 52, Biweekly: 26, 'Semi-monthly': 24, Monthly: 12, Annual: 1 }).map(([label, count]) => <div key={label}><span>{label}</span><strong>{wholeCurrency(result.netPay * periodCount[input.payFrequency] / count)}</strong></div>)}</div><p className="help">Pay-period equivalents use this paycheck&apos;s rate. Actual future checks may differ near annual limits.</p>
+      <div className="share-row"><button type="button" onClick={shareResult}>Share result</button>{shareStatus && <span role="status">{shareStatus}</span>}</div>
+      <div className="periods">{([['Weekly', 'weekly'], ['Biweekly', 'biweekly'], ['Semi-monthly', 'semimonthly'], ['Monthly', 'monthly']] as const).map(([label, frequency]) => <div key={label}><span>{label}</span><strong>{periodResults?.[frequency] ? wholeCurrency(periodResults[frequency].netPay) : '—'}</strong></div>)}<div><span>Annualized</span><strong>{wholeCurrency(result.netPay * periodsPerYear[input.payFrequency])}</strong></div></div><p className="help">Each pay period is calculated separately. A dash means the current per-paycheck deductions exceed pay at that frequency. Annualized pay repeats the selected paycheck; actual yearly totals can differ near wage and contribution limits.</p>
       {!result.local.supported && <p className="local-notice">Local income taxes are not included in this estimate.</p>}
       <p className="verified">Tax rules verified: {result.rules.map(rule => rule.lastVerified).sort().at(-1)} · {result.sources.map((source, index) => <span key={source.url}>{index > 0 ? ' · ' : ''}<a href={source.url} target="_blank" rel="noreferrer">{source.authority}</a></span>)}</p>
       <details className="assumptions"><summary>Assumptions and sources</summary><ul>{result.assumptions.map(item => <li key={item}>{item}</li>)}</ul><p>Tax rules verified: {result.rules.map(rule => rule.lastVerified).sort().at(-1)}</p><ul>{result.sources.map(source => <li key={source.url}><a href={source.url} target="_blank" rel="noreferrer">{source.title}</a> — {source.authority}</li>)}</ul></details><p className="disclaimer">Estimated paycheck — not tax advice.</p>
+      </>}
     </section>
   </div>;
 }

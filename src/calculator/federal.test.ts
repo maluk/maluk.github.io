@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { calculateFederal } from './federal/index.ts';
 import { calculatePaycheck } from './index.ts';
 import { defaultInput } from '../site/defaultInput.ts';
+import { comparePayFrequencies } from './periods.ts';
 import type { PaycheckInput } from './types.ts';
 
 function input(state = 'TX'): PaycheckInput { return defaultInput(state); }
@@ -125,4 +126,44 @@ test('gross-to-net result reconciles to the cent', () => {
   const payroll = result.state.payrollDeductions.reduce((sum, line) => sum + line.amount, 0);
   const deductions = result.federal.incomeTaxWithholding + result.federal.socialSecurity + result.federal.medicare + result.federal.additionalMedicare + result.state.incomeTaxWithholding + result.local.withholding + payroll + result.preTaxDeductions + result.postTaxDeductions;
   assert.equal(Math.round((result.grossPay - deductions) * 100) / 100, result.netPay);
+});
+
+test('invalid calendar dates and negative W-4 amounts fail before withholding', () => {
+  const base = input();
+  assert.throws(() => calculatePaycheck({ ...base, payDate: '2026-02-30' }), /Pay date/);
+  assert.throws(() => calculatePaycheck({ ...base, federal: { ...base.federal, dependentCredits: -1 } }), /Dependent credits/);
+});
+
+test('invalid overtime and percentage deduction entries fail closed', () => {
+  const base = input();
+  assert.throws(() => calculatePaycheck({ ...base, compensation: { type: 'hourly', hourlyRate: 20, regularHours: 80, overtimeMultiplier: 0.5 } }), /Overtime multiplier/);
+  assert.throws(() => calculatePaycheck({ ...base, deductions: [{ id: 'x', label: '401(k)', kind: '401k', amount: 101, unit: 'percent', timing: 'pre_tax' }] }), /percentage/);
+  assert.throws(() => calculatePaycheck({ ...base, deductions: [{ id: 'x', label: 'Custom', kind: 'custom', amount: 10, unit: 'dollars', timing: 'pre_tax', treatment: { federalIncomeTax: true } as never }] }), /every wage base/);
+});
+
+test('withholding greater than gross pay does not produce a negative paycheck', () => {
+  const base = input();
+  assert.throws(() => calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 1000 }, federal: { ...base.federal, extraWithholding: 100 } }), /exceed gross pay/);
+});
+
+test('frequency comparison recalculates a paycheck at a Social Security cap', () => {
+  const base = { ...input(), ytd: { socialSecurityWages: 183000, medicareWages: 183000, grossWages: 183000 } };
+  const results = comparePayFrequencies(base);
+  assert.equal(results.weekly?.federal.socialSecurity, 93);
+  assert.equal(results.biweekly?.federal.socialSecurity, 93);
+  assert.notEqual(results.weekly?.netPay, Math.round(results.biweekly!.netPay / 2 * 100) / 100);
+});
+
+test('frequency comparison scales hourly hours to the same annual work pattern', () => {
+  const base = { ...input(), compensation: { type: 'hourly' as const, hourlyRate: 20, regularHours: 80, overtimeHours: 4 } };
+  const results = comparePayFrequencies(base);
+  assert.equal(results.weekly?.grossPay, 860);
+  assert.equal(results.monthly?.grossPay, 3726.67);
+});
+
+test('frequency comparison leaves unaffordable alternate checks unavailable', () => {
+  const base = { ...input(), deductions: [{ id: 'x', label: 'Expense', kind: 'custom' as const, amount: 1800, unit: 'dollars' as const, timing: 'post_tax' as const }] };
+  const results = comparePayFrequencies(base);
+  assert.equal(results.weekly, undefined);
+  assert.ok(results.biweekly);
 });

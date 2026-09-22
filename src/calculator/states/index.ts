@@ -6,6 +6,10 @@ import { ny2026 } from './NY/2026.ts';
 import { pa2026 } from './PA/2026.ts';
 import { il2026 } from './IL/2026.ts';
 import { in2026 } from './IN/2026.ts';
+import { mi2026 } from './MI/2026.ts';
+import { nc2026 } from './NC/2026.ts';
+import { ga2026 } from './GA/2026.ts';
+import { az2026 } from './AZ/2026.ts';
 
 export const stateCalculators: Record<number, Record<string, StateCalculator>> = {
   2025: {
@@ -20,6 +24,10 @@ export const stateCalculators: Record<number, Record<string, StateCalculator>> =
     PA: pa2026,
     IL: il2026,
     IN: in2026,
+    MI: mi2026,
+    NC: nc2026,
+    GA: ga2026,
+    AZ: az2026,
     TX: noIncomeTaxCalculator('TX', 2026),
     FL: noIncomeTaxCalculator('FL', 2026),
     WA: noIncomeTaxCalculator('WA', 2026),

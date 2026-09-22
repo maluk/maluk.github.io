@@ -136,3 +136,59 @@ test('Indiana 2026 Departmental Notice #1 example gives $13.96 state withholding
   assert.equal(result.state.incomeTaxWithholding, 13.96);
   assert.equal(result.local.supported, false);
 });
+
+test('Michigan Form 446 direct percentage method applies MI-W4 exemptions', () => {
+  const base = defaultInput('MI');
+  const weekly = { ...base, payFrequency: 'weekly' as const, compensation: { type: 'hourly' as const, hourlyRate: 25, regularHours: 40 } };
+  assert.equal(calculatePaycheck(weekly).state.incomeTaxWithholding, 42.50);
+  const exempted = calculatePaycheck({ ...weekly, stateOptions: { miExemptions: 2 } });
+  assert.equal(exempted.state.incomeTaxWithholding, 32.86);
+  assert.equal(exempted.local.supported, false);
+});
+
+test('Michigan MI-W4 exemptions require whole numbers', () => {
+  const base = defaultInput('MI');
+  assert.throws(() => calculatePaycheck({ ...base, stateOptions: { miExemptions: 1.5 } }), /whole number/);
+});
+
+test('North Carolina NC-30 official weekly percentage example with two allowances gives $4', () => {
+  const base = defaultInput('NC');
+  const result = calculatePaycheck({ ...base, payFrequency: 'weekly', compensation: { type: 'hourly', hourlyRate: 15, regularHours: 30 }, stateOptions: { ncAllowances: 2 } });
+  assert.equal(result.state.incomeTaxWithholding, 4);
+});
+
+test('North Carolina head of household deduction and zero-pay boundary', () => {
+  const base = defaultInput('NC');
+  const single = calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 50000 } });
+  const head = calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 50000 }, federal: { ...base.federal, filingStatus: 'head_of_household' } });
+  assert.ok(head.state.incomeTaxWithholding < single.state.incomeTaxWithholding);
+  assert.equal(calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 0 } }).state.incomeTaxWithholding, 0);
+});
+
+test('Georgia 2026 guide example: $2,000 semimonthly, married, one child gives $27.03', () => {
+  const base = defaultInput('GA');
+  const result = calculatePaycheck({ ...base, payFrequency: 'semimonthly', compensation: { type: 'hourly', hourlyRate: 20, regularHours: 100 }, federal: { ...base.federal, filingStatus: 'married_joint' }, stateOptions: { gaDependents: 1 } });
+  assert.equal(result.state.incomeTaxWithholding, 27.03);
+});
+
+test('Georgia uses the prior withholding schedule before May 11, 2026', () => {
+  const base = defaultInput('GA');
+  const pay = { ...base, payFrequency: 'semimonthly' as const, compensation: { type: 'hourly' as const, hourlyRate: 20, regularHours: 100 }, federal: { ...base.federal, filingStatus: 'married_joint' as const }, stateOptions: { gaDependents: 1 } };
+  const before = calculatePaycheck({ ...pay, payDate: '2026-05-10' });
+  const after = calculatePaycheck({ ...pay, payDate: '2026-05-11' });
+  assert.equal(before.state.incomeTaxWithholding, 43.25);
+  assert.equal(after.state.incomeTaxWithholding, 27.03);
+});
+
+test('Arizona A-4 default and elected rates apply to taxable paycheck wages', () => {
+  const base = defaultInput('AZ');
+  const pay = { ...base, compensation: { type: 'hourly' as const, hourlyRate: 25, regularHours: 40 } };
+  assert.equal(calculatePaycheck(pay).state.incomeTaxWithholding, 20);
+  assert.equal(calculatePaycheck({ ...pay, stateOptions: { azWithholdingRate: .035, azExtraWithholding: 10 } }).state.incomeTaxWithholding, 45);
+  assert.equal(calculatePaycheck({ ...pay, stateOptions: { azWithholdingRate: 0 } }).state.incomeTaxWithholding, 0);
+});
+
+test('Arizona rejects percentages outside Form A-4 elections', () => {
+  const base = defaultInput('AZ');
+  assert.throws(() => calculatePaycheck({ ...base, stateOptions: { azWithholdingRate: .04 } }), /Arizona A-4/);
+});

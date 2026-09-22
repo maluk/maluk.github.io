@@ -3,6 +3,7 @@ import { roundMoney } from './money.ts';
 import { calculateDeductions } from './deductions.ts';
 import { calculateFederal } from './federal/index.ts';
 import { stateCalculators } from './states/index.ts';
+import { validatePaycheckInput } from './validation.ts';
 
 const periods = { weekly: 52, biweekly: 26, semimonthly: 24, monthly: 12 };
 
@@ -16,7 +17,7 @@ export function projectedYtd(grossPay: number, payDate: string, payFrequency: ke
 }
 
 export function calculatePaycheck(input: PaycheckInput, ruleSet?: StateCalculator): PaycheckResult {
-  if (Number(input.payDate.slice(0, 4)) !== input.taxYear) throw new Error('Pay date and tax year must match');
+  validatePaycheckInput(input);
   const count = periods[input.payFrequency];
   const grossPay = roundMoney(input.compensation.type === 'salary'
     ? input.compensation.annualSalary / count
@@ -24,12 +25,10 @@ export function calculatePaycheck(input: PaycheckInput, ruleSet?: StateCalculato
   if (!Number.isFinite(grossPay) || grossPay < 0) throw new Error('Gross pay must be nonnegative');
   const stateRule = ruleSet ?? stateCalculators[input.taxYear]?.[input.location.state];
   if (!stateRule || stateRule.metadata.status !== 'verified') throw new Error(`Verified state rules are unavailable for ${input.location.state} in ${input.taxYear}`);
+  if (stateRule.metadata.taxYear !== input.taxYear || stateRule.metadata.jurisdiction !== input.location.state) throw new Error('Tax rule and paycheck jurisdiction do not match');
   const deductions = calculateDeductions(input, grossPay);
   const projected = projectedYtd(grossPay, input.payDate, input.payFrequency);
   const ytd = input.ytd || {};
-  for (const value of [ytd.grossWages, ytd.socialSecurityWages, ytd.medicareWages, ytd.stateWages, ...Object.values(ytd.payrollContributions ?? {})]) {
-    if (value !== undefined && (!Number.isFinite(value) || value < 0)) throw new Error('YTD values must be nonnegative');
-  }
   const federal = calculateFederal(input, { income: deductions.wages.income, socialSecurity: deductions.wages.socialSecurity, medicare: deductions.wages.medicare }, {
     socialSecurity: ytd.socialSecurityWages ?? projected * (grossPay ? deductions.wages.socialSecurity / grossPay : 0),
     medicare: ytd.medicareWages ?? projected * (grossPay ? deductions.wages.medicare / grossPay : 0),
@@ -46,6 +45,7 @@ export function calculatePaycheck(input: PaycheckInput, ruleSet?: StateCalculato
   const withholding = federal.incomeTaxWithholding + federal.socialSecurity + federal.medicare + federal.additionalMedicare
     + state.incomeTaxWithholding + state.localWithholding + state.payrollDeductions.reduce((sum, row) => sum + row.amount, 0);
   const netPay = roundMoney(grossPay - withholding - deductions.preTaxDeductions - deductions.postTaxDeductions);
+  if (netPay < 0) throw new Error('Withholding and deductions exceed gross pay');
   const assumptions = [
     'One employer; work and residence are in the selected state.',
     ...([ytd.grossWages, ytd.socialSecurityWages, ytd.medicareWages].some(value => value === undefined) ? ['Missing YTD wages are projected from the selected pay date and current pay pattern.'] : []),

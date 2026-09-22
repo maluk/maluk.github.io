@@ -1,6 +1,8 @@
 # Paycheck Calculator V2: remaining work
 
-Status on 2026-09-22: the branch exports the homepage, 14 current-year state pages, and four 2025 historical pages. It has 41 passing calculation tests. The branch is not deployed; CI currently uploads the static build as an artifact. The V2 definition of done is not yet met.
+Status on 2026-09-22: the branch exports the homepage, 18 current-year state pages, and four 2025 historical pages. It has 55 passing calculation tests. The branch is not deployed; CI currently uploads the static build as an artifact. The V2 definition of done is not yet met.
+
+Completed since the first draft: input validation now fails closed for invalid pay dates, W-4 values, deductions, and negative net pay; an invalid entry hides the prior result. Period comparisons run a separate withholding calculation for each frequency. The result can be shared without sending wage amounts to analytics. Official-source 2026 modules and tests were added for Michigan, North Carolina, Georgia, and Arizona. Georgia selects the withholding schedule using the May 11, 2026 change date.
 
 ## 1. Close the accuracy gate on existing coverage
 
@@ -8,7 +10,7 @@ Status on 2026-09-22: the branch exports the homepage, 14 current-year state pag
 
 **PAY-003 — Finish 2025 New York.** Implement the 2025 NYS, NYC, and Yonkers withholding schedules from the publications identified by the NY Tax Department's 2025 notice, plus 2025 Paid Family Leave. Publish `/new-york/2025/` only after official-example and cap tests pass.
 
-**PAY-004 — Harden paycheck inputs and results.** Validate W-4 and state inputs, make invalid calculations hide the last valid result, and make the optional YTD fields and projection assumptions unambiguous. Recalculate each pay frequency for the result summaries instead of scaling one net paycheck, since caps can change across periods. Keep omitted local taxes visible in the result.
+**PAY-004 — Harden paycheck inputs and results.** Core validation, invalid-result handling, and pay-frequency recalculation are implemented. Review optional YTD labels and projection assumptions with users, and audit all state-specific input validation. Keep omitted local taxes visible in the result.
 
 ## 2. Finish 2026 state coverage
 
@@ -16,16 +18,16 @@ Add one jurisdiction-specific calculator per state. For each module, record the 
 
 Build in the existing SEO priority order:
 
-1. **Next:** OH, GA, NC, MI, NJ, VA, AZ, MA.
+1. **Next:** OH, NJ, VA, MA. GA, NC, MI, and AZ are implemented.
 2. **Then:** MD, MO, WI, CO, MN, SC, AL, LA, KY, OR, OK, CT, UT, IA.
 3. **Then:** AR, MS, KS, NM, NE, ID, WV, HI, ME, MT, RI, DE, ND, VT.
 4. **Same release if ready:** DC.
 
-This is 36 remaining states plus DC. County and municipal taxes beyond NYC and Yonkers remain outside V2; the result must explicitly say when local income tax is excluded. Do not use one generic bracket model for jurisdictions whose payroll rules require their own logic.
+This is 32 remaining states plus DC. County and municipal taxes beyond NYC and Yonkers remain outside V2; the result must explicitly say when local income tax is excluded. Do not use one generic bracket model for jurisdictions whose payroll rules require their own logic.
 
 ## 3. Complete the product and indexable pages
 
-**PAY-005 — Product completion.** Add missing result sharing and `result_shared` tracking. Track `related_salary_clicked` when related pages exist. Review analytics to ensure no exact salary or YTD amount is sent to third parties. Add state-specific examples and assumptions for every state page.
+**PAY-005 — Product completion.** Result sharing and `result_shared` tracking are implemented with state and frequency only. Track `related_salary_clicked` when related pages exist. Review analytics to ensure no exact salary or YTD amount is sent to third parties. Add state-specific examples and assumptions for every state page.
 
 **PAY-006 — SEO and page QA.** Make each state introduction, payroll explanation, and FAQ genuinely state-specific. Generate example results server-side for common salaries and all four pay frequencies. Verify direct HTML contains title, description, H1, calculator defaults, result, methodology, sources, and internal links. Include only verified current-year states in the sitemap and keep `/state/` self-canonical. Do not create salary or comparison links to pages that do not yet exist.
 
