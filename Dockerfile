@@ -1,5 +1,4 @@
-# Use Node.js 18 as the base image for the build stage, matching the GitHub Action
-FROM node:18-alpine as build
+FROM node:22-alpine as build
 
 # Set the working directory
 WORKDIR /app
@@ -9,15 +8,12 @@ COPY package*.json ./
 
 # Install dependencies
 # The workflow has explicit installs, but npm install should cover dependencies in package.json
-RUN npm install
+RUN npm ci
 
 # Copy the rest of the application code
 COPY . .
 
 # Build the application
-# Setting NODE_OPTIONS=--openssl-legacy-provider as seen in the GitHub Action
-# This is required for older react-scripts on newer Node versions
-ENV NODE_OPTIONS=--openssl-legacy-provider
 RUN npm run build
 
 # --- Kardbrd Agent Stage ---
@@ -62,7 +58,7 @@ CMD ["start", "--cwd", "/home/agent/repository"]
 FROM nginx:alpine
 
 # Copy the build output from the build stage to the Nginx html directory
-COPY --from=build /app/build /usr/share/nginx/html
+COPY --from=build /app/out /usr/share/nginx/html
 
 # Expose port 80
 EXPOSE 80

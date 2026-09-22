@@ -1,20 +1,20 @@
-name: CI
-on: [push]
+name: Build and verify
+on:
+  push:
+  pull_request:
 jobs:
   build:
-    name: Build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
-      with:
-        node-version: 18
-    - run: npm install react-scripts --save
-    - run: npm install build
-    - run: CI=false && NODE_OPTIONS=--openssl-legacy-provider npm run-script build
-    - uses: peaceiris/actions-gh-pages@v3
-      if: github.ref == 'refs/heads/master'
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./build
-        cname: thetax.us
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: thetax-static-site
+          path: out
