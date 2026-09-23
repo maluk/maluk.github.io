@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "verify:static": "node --experimental-strip-types scripts/verify-static.mjs",
     "test": "node --test --experimental-strip-types src/calculator/*.test.ts"
   },
   "dependencies": {

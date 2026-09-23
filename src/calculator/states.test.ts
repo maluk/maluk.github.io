@@ -845,3 +845,23 @@ test('all 50 verified state calculators handle zero and very high wages', () => 
     assert.ok(high.rules.every(rule => rule.status === 'verified' && rule.sources.length > 0), `${page.code} sources`);
   }
 });
+
+test('New York City 2026 Method II matches official weekly and monthly examples', () => {
+  const base = defaultInput('NY');
+  const weekly = calculatePaycheck({ ...base, payFrequency: 'weekly', compensation: { type: 'hourly', hourlyRate: 10, regularHours: 40 }, stateOptions: { nyAllowances: 3 }, location: { state: 'NY', city: 'New York City' } });
+  assert.equal(weekly.local.withholding, 6.11);
+  const monthly = calculatePaycheck({ ...base, payFrequency: 'monthly', compensation: { type: 'salary', annualSalary: 600000 }, stateOptions: { nyAllowances: 3 }, location: { state: 'NY', city: 'New York City' } });
+  assert.equal(monthly.local.withholding, 2070.50);
+});
+
+test('Yonkers 2026 resident surcharge matches its weekly Method II example', () => {
+  const base = defaultInput('NY');
+  const result = calculatePaycheck({ ...base, payFrequency: 'weekly', compensation: { type: 'hourly', hourlyRate: 10, regularHours: 40 }, stateOptions: { nyAllowances: 3 }, location: { state: 'NY', city: 'Yonkers' } });
+  assert.equal(result.local.withholding, 1.34);
+});
+
+test('Delaware warns that Wilmington wage tax is excluded even before a city is entered', () => {
+  const result = calculatePaycheck(defaultInput('DE'));
+  assert.equal(result.local.supported, false);
+  assert.ok(result.assumptions.some(item => item.includes('Wilmington')));
+});

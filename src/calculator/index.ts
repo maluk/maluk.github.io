@@ -51,9 +51,13 @@ export function calculatePaycheck(input: PaycheckInput, ruleSet?: StateCalculato
     + state.incomeTaxWithholding + state.localWithholding + state.payrollDeductions.reduce((sum, row) => sum + row.amount, 0);
   const netPay = roundMoney(grossPay - withholding - deductions.preTaxDeductions - deductions.postTaxDeductions);
   if (netPay < 0) throw new Error('Withholding and deductions exceed gross pay');
+  const hasDefaultCafeteriaTreatment = input.deductions.some(item => item.timing === 'pre_tax' && !item.treatment && ['hsa', 'fsa', 'health', 'dental', 'vision'].includes(item.kind));
+  const hasTraditional401k = input.deductions.some(item => item.timing === 'pre_tax' && item.kind === '401k');
   const assumptions = [
     'One employer; work and residence are in the selected state.',
     ...([ytd.grossWages, ytd.socialSecurityWages, ytd.medicareWages].some(value => value === undefined) ? ['Missing YTD wages are projected from the selected pay date and current pay pattern.'] : []),
+    ...(hasDefaultCafeteriaTreatment ? ['HSA, FSA, and insurance deductions use the tax treatment of an eligible employer Section 125 cafeteria plan. A direct HSA payroll deduction outside such a plan has different federal withholding treatment. Contribution limits are not validated.'] : []),
+    ...(hasTraditional401k ? ['Traditional 401(k) deferrals reduce federal income-tax wages but remain subject to Social Security and Medicare; state treatment can differ. Contribution limits are not validated.'] : []),
     ...stateRule.getAssumptions(), ...state.assumptions,
   ];
   if (!state.localSupported) assumptions.push('Local income taxes are not included in this estimate.');
@@ -67,7 +71,7 @@ export function calculatePaycheck(input: PaycheckInput, ruleSet?: StateCalculato
     postTaxDeductions: deductions.postTaxDeductions,
     netPay,
     assumptions,
-    sources: [...federal.metadata.sources, ...stateRule.getSources()],
+    sources: [...federal.metadata.sources, ...stateRule.getSources(), ...((hasDefaultCafeteriaTreatment || hasTraditional401k) ? [{ title: `Publication 15 (${input.taxYear}), Employer’s Tax Guide`, authority: 'IRS', url: input.taxYear === 2026 ? 'https://www.irs.gov/publications/p15' : 'https://www.irs.gov/pub/irs-prior/p15--2025.pdf' }] : [])],
     rules: [federal.metadata, stateRule.metadata],
   };
 }

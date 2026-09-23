@@ -22,7 +22,12 @@ const periodRows: Record<keyof typeof periods, { single: Row[]; married: Row[] }
     married: [[0,0,.039],[708,27.67,.044],[975,39.33,.0515],[1158,48.83,.054],[6721,349.17,.059],[8067,428.58,.0657],[8971,487.92,.0707],[13138,782.33,.0801],[17629,1142.33,.064],[26933,1737.83,.1349],[31100,2300,.0735],[89796,6614.08,.0765]],
   },
 };
-const city: Row[] = [[0,0,.0205],[8000,164,.028],[8700,184,.0325],[15000,388,.0395],[25000,783,.0415],[60000,2236,.0425]];
+const cityPeriodRows: Record<keyof typeof periods, Row[]> = {
+  weekly: [[0,0,.0205],[154,3.15,.028],[167,3.54,.0325],[288,7.46,.0395],[481,15.06,.0415],[1154,43,.0425]],
+  biweekly: [[0,0,.0205],[308,6.31,.028],[334,7.08,.0325],[577,14.92,.0395],[962,30.12,.0415],[2308,86,.0425]],
+  semimonthly: [[0,0,.0205],[333,6.83,.028],[362,7.67,.0325],[625,16.17,.0395],[1042,32.63,.0415],[2500,93.17,.0425]],
+  monthly: [[0,0,.0205],[667,13.67,.028],[725,15.33,.0325],[1250,32.33,.0395],[2083,65.25,.0415],[5000,186.33,.0425]],
+};
 const periods = { weekly: 52, biweekly: 26, semimonthly: 24, monthly: 12 };
 const nyDeduction = {
   weekly: { single: 142.30, married: 152.90, allowance: 19.25 },
@@ -39,7 +44,7 @@ const cityDeduction = {
 const source = (title: string, url: string) => ({ title, authority: 'New York State', url });
 const metadata: TaxRuleMetadata = {
   jurisdiction: 'NY', taxYear: 2026, effectiveFrom: '2026-01-01', effectiveTo: '2026-12-31',
-  lastVerified: '2026-09-22', status: 'verified', version: '2026.1', sources: [
+  lastVerified: '2026-09-23', status: 'verified', version: '2026.2', sources: [
     source('NYS-50-T-NYS (1/26)', 'https://www.tax.ny.gov/pdf/publications/withholding/nys50_t_nys.pdf'),
     source('NYS-50-T-NYC (1/26)', 'https://www.tax.ny.gov/pdf/publications/withholding/nys50_t_nyc.pdf'),
     source('NYS-50-T-Y (1/26)', 'https://www.tax.ny.gov/pdf/publications/withholding/nys50_t_y.pdf'),
@@ -58,7 +63,7 @@ function nyTax(wages: number, frequency: keyof typeof periods, isMarried: boolea
 function cityTax(wages: number, frequency: keyof typeof periods, isMarried: boolean, allowances: number): number {
   const deductions = cityDeduction[frequency];
   const net = Math.max(0, wages - (isMarried ? deductions.married : deductions.single) - allowances * deductions.allowance);
-  return roundMoney(annualWithholding(net * periods[frequency], city) / periods[frequency]);
+  return roundMoney(annualWithholding(net, cityPeriodRows[frequency]));
 }
 
 export const ny2026: StateCalculator = {

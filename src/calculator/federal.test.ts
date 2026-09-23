@@ -86,12 +86,15 @@ test('traditional 401(k) reduces income wages but not FICA wages', () => {
   const result = calculatePaycheck({ ...base, deductions: [{ id: 'k', label: '401(k)', kind: '401k', amount: 100, unit: 'dollars', timing: 'pre_tax' }] });
   assert.equal(result.federal.socialSecurity, calculatePaycheck(base).federal.socialSecurity);
   assert.ok(result.federal.incomeTaxWithholding < calculatePaycheck(base).federal.incomeTaxWithholding);
+  assert.ok(result.assumptions.some(item => item.includes('401(k) deferrals')));
 });
 
 test('HSA payroll contribution reduces FICA wages', () => {
   const base = input();
   const result = calculatePaycheck({ ...base, deductions: [{ id: 'h', label: 'HSA', kind: 'hsa', amount: 100, unit: 'dollars', timing: 'pre_tax' }] });
   assert.equal(result.federal.socialSecurity, 232.26);
+  assert.ok(result.assumptions.some(item => item.includes('Section 125 cafeteria plan')));
+  assert.ok(result.sources.some(item => item.url === 'https://www.irs.gov/publications/p15'));
 });
 
 test('percentage deductions use paycheck gross', () => {

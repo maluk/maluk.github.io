@@ -9,7 +9,7 @@ const taxSteps = [
 ] as const;
 const metadata: TaxRuleMetadata = {
   jurisdiction: 'DE', taxYear: 2026, effectiveFrom: '2026-01-01', effectiveTo: '2026-12-31',
-  lastVerified: '2026-09-22', status: 'verified', version: '2026.1', sources: [
+  lastVerified: '2026-09-23', status: 'verified', version: '2026.2', sources: [
     { title: 'Employer’s Guide: withholding regulations and approved annualized formula', authority: 'Delaware Division of Revenue', url: 'https://revenue.delaware.gov/employers-guide-withholding-regulations-employers-duties/' },
     { title: 'Delaware Paid Leave employer and TPA guide', authority: 'Delaware Department of Labor', url: 'https://laborfiles.delaware.gov/main/pfl/Employer_and_TPAs_Guide_to_DPL.pdf' },
     { title: 'Delaware Paid Leave program coverage', authority: 'Delaware Department of Labor', url: 'https://labor.delaware.gov/delaware-paid-leave/' },
@@ -23,6 +23,7 @@ export const de2026: StateCalculator = {
     'Delaware uses its Division of Revenue approved annualized withholding method with zero exemption credits until entered.',
     'Paid Leave assumes an employer with at least 25 workers, full public-plan coverage, and the maximum 50% employee share.',
     'Employers with 10–24 workers only require parental-leave coverage; smaller employers are generally exempt. The employer may pay some or all of the employee share.',
+    'Wilmington imposes a separate 1.25% city wage tax on residents and people working in the city. It is not included in this state-level estimate.',
   ],
   calculate({ input, grossPay, stateTaxableWages, ytdGrossWages }: StateInput): StateResult {
     const exemptions = input.stateOptions?.deExemptions ?? 0;
@@ -42,7 +43,7 @@ export const de2026: StateCalculator = {
     return {
       incomeTaxWithholding: roundMoney(annualTax / periods[input.payFrequency] + extra),
       payrollDeductions: [{ id: 'de-paid-leave', label: 'Delaware Paid Leave', amount: roundMoney(coveredWages * premiumRate * employeeShare) }],
-      localWithholding: 0, localSupported: !input.location.city, assumptions: [],
+      localWithholding: 0, localSupported: false, assumptions: [],
     };
   },
 };
