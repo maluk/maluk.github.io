@@ -1,8 +1,8 @@
 # Paycheck Calculator V2: remaining work
 
-Status on 2026-09-22: the branch exports the homepage, 18 current-year state pages, and four 2025 historical pages. It has 55 passing calculation tests. The branch is not deployed; CI currently uploads the static build as an artifact. The V2 definition of done is not yet met.
+Status on 2026-09-22: the branch exports the homepage, 31 current-year state pages, and four 2025 historical pages. It has 84 passing calculation tests. The branch is not deployed; CI currently uploads the static build as an artifact. The V2 definition of done is not yet met.
 
-Completed since the first draft: input validation now fails closed for invalid pay dates, W-4 values, deductions, and negative net pay; an invalid entry hides the prior result. Period comparisons run a separate withholding calculation for each frequency. The result can be shared without sending wage amounts to analytics. Official-source 2026 modules and tests were added for Michigan, North Carolina, Georgia, and Arizona. Georgia selects the withholding schedule using the May 11, 2026 change date.
+Completed since the first draft: input validation now fails closed for invalid pay dates, W-4 values, deductions, and negative net pay; an invalid entry hides the prior result. Period comparisons run a separate withholding calculation for each frequency. The result can be shared without sending wage amounts to analytics. Official-source 2026 modules and tests were added for Michigan, North Carolina, Georgia, Arizona, Ohio, Virginia, Massachusetts, Colorado, Kentucky, Utah, Missouri, Iowa, Mississippi, South Carolina, Alabama, Kansas, and West Virginia. Georgia and Ohio select the withholding schedule using their 2026 change dates. Massachusetts and Colorado include statewide paid-leave payroll premiums. Alabama uses the calculated federal withholding as an input to its state formula. West Virginia deliberately rejects pay dates before June 12, 2026 until the applicable earlier schedule is verified.
 
 ## 1. Close the accuracy gate on existing coverage
 
@@ -18,12 +18,12 @@ Add one jurisdiction-specific calculator per state. For each module, record the 
 
 Build in the existing SEO priority order:
 
-1. **Next:** OH, NJ, VA, MA. GA, NC, MI, and AZ are implemented.
-2. **Then:** MD, MO, WI, CO, MN, SC, AL, LA, KY, OR, OK, CT, UT, IA.
-3. **Then:** AR, MS, KS, NM, NE, ID, WV, HI, ME, MT, RI, DE, ND, VT.
+1. **Next:** NJ. OH, VA, and MA are implemented.
+2. **Then:** MD, WI, MN, LA, OR, OK, CT. MO, CO, KY, UT, IA, SC, and AL are implemented.
+3. **Then:** AR, NM, NE, ID, HI, ME, MT, RI, DE, ND, VT. MS, KS, and WV are implemented. Verify the earlier 2026 WV withholding schedule before supporting pay dates prior to June 12.
 4. **Same release if ready:** DC.
 
-This is 32 remaining states plus DC. County and municipal taxes beyond NYC and Yonkers remain outside V2; the result must explicitly say when local income tax is excluded. Do not use one generic bracket model for jurisdictions whose payroll rules require their own logic.
+This is 19 remaining states plus DC. County and municipal taxes beyond NYC and Yonkers remain outside V2; the result must explicitly say when local income tax is excluded. Do not use one generic bracket model for jurisdictions whose payroll rules require their own logic.
 
 ## 3. Complete the product and indexable pages
 

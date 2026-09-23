@@ -79,6 +79,10 @@ export interface StateInput {
   ytdGrossWages: number;
   ytdStateWages: number;
   ytdPayrollContributions: Record<string, number>;
+  federalPayrollTaxes?: { socialSecurity: number; medicare: number; additionalMedicare: number };
+  federalIncomeTaxWithholding?: number;
+  ytdSocialSecurityWages?: number;
+  ytdMedicareWages?: number;
 }
 
 export interface StateResult {

@@ -41,6 +41,10 @@ export function calculatePaycheck(input: PaycheckInput, ruleSet?: StateCalculato
     ytdGrossWages: ytd.grossWages ?? projected,
     ytdStateWages: ytd.stateWages ?? projected * (grossPay ? deductions.wages.state / grossPay : 0),
     ytdPayrollContributions: ytd.payrollContributions ?? {},
+    federalPayrollTaxes: { socialSecurity: federal.socialSecurity, medicare: federal.medicare, additionalMedicare: federal.additionalMedicare },
+    federalIncomeTaxWithholding: federal.incomeTaxWithholding,
+    ytdSocialSecurityWages: ytd.socialSecurityWages ?? projected * (grossPay ? deductions.wages.socialSecurity / grossPay : 0),
+    ytdMedicareWages: ytd.medicareWages ?? projected * (grossPay ? deductions.wages.medicare / grossPay : 0),
   });
   const withholding = federal.incomeTaxWithholding + federal.socialSecurity + federal.medicare + federal.additionalMedicare
     + state.incomeTaxWithholding + state.localWithholding + state.payrollDeductions.reduce((sum, row) => sum + row.amount, 0);
