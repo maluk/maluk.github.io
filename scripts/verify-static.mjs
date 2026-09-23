@@ -5,10 +5,11 @@ import { verifiedStatePages } from '../src/site/states.ts';
 
 const root = join(process.cwd(), 'out');
 const sitemap = readFileSync(join(root, 'sitemap.xml'), 'utf8');
-const redirects = readFileSync(join(root, '_redirects'), 'utf8');
 const home = readFileSync(join(root, 'index.html'), 'utf8');
 assert.ok(home.includes('Know what actually lands in your bank account.'), 'Homepage must be prerendered');
 assert.equal(verifiedStatePages.length, 50, 'Exactly 50 current state pages must be verified');
+assert.equal(readFileSync(join(root, 'CNAME'), 'utf8').trim(), 'thetax.us', 'GitHub Pages custom domain is missing');
+assert.ok(existsSync(join(root, '.nojekyll')), 'GitHub Pages must serve _next assets');
 
 for (const page of verifiedStatePages) {
   const path = join(root, page.slug, 'index.html');
@@ -27,12 +28,15 @@ for (const page of verifiedStatePages) {
     ['disclaimer', 'Estimated paycheck — not tax advice.'],
   ]) assert.ok(html.includes(token), `${page.code} missing ${name}`);
   assert.ok(sitemap.includes(`<loc>${canonical}</loc>`), `${page.code} missing from sitemap`);
-  assert.ok(!existsSync(join(root, page.slug, '2026', 'index.html')), `${page.code} has a duplicate current-year page`);
+  assert.ok(!sitemap.includes(`<loc>${canonical.slice(0, -1)}/2026/</loc>`), `${page.code} has a duplicate sitemap entry`);
 }
 
 for (const slug of ['california', 'texas', 'new-york', 'florida', 'washington']) {
-  assert.ok(redirects.includes(`/${slug}/2026/ /${slug}/ 301`), `${slug} missing legacy redirect`);
+  const legacy = readFileSync(join(root, slug, '2026', 'index.html'), 'utf8');
+  assert.ok(legacy.includes(`content="0;url=/${slug}/"`), `${slug} missing legacy refresh`);
+  assert.ok(legacy.includes(`href="https://thetax.us/${slug}/"`), `${slug} missing canonical target`);
+  assert.ok(legacy.includes('content="noindex, follow"'), `${slug} legacy page must not be indexed`);
 }
 
 assert.ok(readFileSync(join(root, 'maryland', 'index.html'), 'utf8').includes('Local income taxes are not included in this estimate.'), 'Maryland county-tax omission must be visible');
-console.log(`Verified static HTML, sitemap, and redirects for ${verifiedStatePages.length} states.`);
+console.log(`Verified GitHub Pages HTML, sitemap, and legacy URL handling for ${verifiedStatePages.length} states.`);

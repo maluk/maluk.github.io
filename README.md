@@ -24,6 +24,8 @@ The calculation assumes one employer and that the worker lives and works in the 
 
 ## Deployment
 
-The repository builds a static export and CI uploads `out/` as an artifact. For production, create a Cloudflare Pages Direct Upload project named `thetax-us` with production branch `master`. Configure the repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`, then run the manual **Deploy TheTax.us to Cloudflare Pages** workflow after release review. The workflow runs tests and builds before uploading `out/`. Attach `thetax.us` as the custom domain. Cloudflare Pages applies `public/_redirects`, which sends old `/state/2026/` URLs to the canonical current-year `/state/` URL with HTTP 301. Verify those responses and the generated `/sitemap.xml` before switching DNS. The legacy GitHub Pages workflow no longer deploys because GitHub Pages cannot apply those redirect rules.
+The site uses the existing `gh-pages` branch and `thetax.us` GitHub Pages custom domain. `npm run build` exports static HTML to `out/` and adds the `CNAME`, `.nojekyll`, and legacy current-year URL pages. CI runs tests, builds, verifies the export, and uploads it as an artifact. After release review, run `npm run deploy` from a clean checkout. It repeats those checks, replaces the contents of the `gh-pages` branch, and pushes a deployment commit. Check the live site after GitHub Pages finishes publishing.
 
-The old CRA source is no longer part of the build. The Node Dockerfile serves `out/` through Nginx for local static preview, but Cloudflare Pages is needed for the 301 redirects in `public/_redirects`.
+GitHub Pages serves legacy `/state/2026/` pages with HTTP 200. Those pages have an immediate refresh, a canonical link to `/state/`, and `noindex`; GitHub Pages cannot send the requested HTTP 301 redirects. A hosting layer that supports redirects is required to satisfy that exact SEO requirement.
+
+The old CRA source is no longer part of the build. The Node Dockerfile serves `out/` through Nginx for local static preview.

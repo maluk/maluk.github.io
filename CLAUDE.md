@@ -10,7 +10,7 @@ npm test
 npm run build
 ```
 
-The build produces `out/`. CI verifies tests and build, then uploads that directory as an artifact. It does not deploy to production.
+The build produces `out/` with GitHub Pages metadata and legacy URL pages. CI verifies tests and build, then uploads that directory as an artifact. Production deploys through `npm run deploy` to the existing `gh-pages` branch after release review.
 
 ## Payroll rules
 

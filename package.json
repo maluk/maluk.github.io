@@ -7,6 +7,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "node scripts/prepare-github-pages.mjs",
+    "deploy": "bash scripts/deploy-github-pages.sh",
     "verify:static": "node --experimental-strip-types scripts/verify-static.mjs",
     "test": "node --test --experimental-strip-types src/calculator/*.test.ts"
   },
