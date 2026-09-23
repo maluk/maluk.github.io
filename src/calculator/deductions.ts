@@ -11,6 +11,7 @@ export function treatmentFor(deduction: Deduction, state: string): DeductionTaxT
   if (deduction.kind === 'custom') throw new Error('Custom deductions require an explicit tax treatment');
   if (deduction.kind === '401k') return state === 'PA' ? { ...incomeOnly, stateIncomeTax: false, localIncomeTax: false } : incomeOnly;
   if (deduction.kind === 'hsa' && state === 'CA') return { ...all, stateIncomeTax: false };
+  if (state === 'NJ') return { ...all, stateIncomeTax: false };
   return all;
 }
 

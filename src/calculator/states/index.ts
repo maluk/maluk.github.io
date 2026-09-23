@@ -23,6 +23,15 @@ import { sc2026 } from './SC/2026.ts';
 import { al2026 } from './AL/2026.ts';
 import { ks2026 } from './KS/2026.ts';
 import { wv2026 } from './WV/2026.ts';
+import { nj2026 } from './NJ/2026.ts';
+import { wi2026 } from './WI/2026.ts';
+import { ok2026 } from './OK/2026.ts';
+import { nd2026 } from './ND/2026.ts';
+import { id2026 } from './ID/2026.ts';
+import { de2026 } from './DE/2026.ts';
+import { ri2026 } from './RI/2026.ts';
+import { la2026 } from './LA/2026.ts';
+import { ne2026 } from './NE/2026.ts';
 
 export const stateCalculators: Record<number, Record<string, StateCalculator>> = {
   2025: {
@@ -54,6 +63,15 @@ export const stateCalculators: Record<number, Record<string, StateCalculator>> =
     AL: al2026,
     KS: ks2026,
     WV: wv2026,
+    NJ: nj2026,
+    WI: wi2026,
+    OK: ok2026,
+    ND: nd2026,
+    ID: id2026,
+    DE: de2026,
+    RI: ri2026,
+    LA: la2026,
+    NE: ne2026,
     TX: noIncomeTaxCalculator('TX', 2026),
     FL: noIncomeTaxCalculator('FL', 2026),
     WA: noIncomeTaxCalculator('WA', 2026),

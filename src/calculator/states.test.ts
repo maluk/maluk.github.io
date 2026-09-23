@@ -5,6 +5,8 @@ import { defaultInput } from '../site/defaultInput.ts';
 import { ca2026 } from './states/CA/2026.ts';
 import { ca2025 } from './states/CA/2025.ts';
 import { al2026 } from './states/AL/2026.ts';
+import { nj2026 } from './states/NJ/2026.ts';
+import { wi2026 } from './states/WI/2026.ts';
 
 test('California 2025 Method B matches EDD Example B', () => {
   const base = defaultInput('CA', 2025);
@@ -428,4 +430,173 @@ test('West Virginia zero wages and IT-104 eligibility boundaries', () => {
   assert.throws(() => calculatePaycheck({ ...base, stateOptions: { wvExemptions: 1.5 } }), /whole number/);
   assert.throws(() => calculatePaycheck({ ...base, federal: { ...base.federal, multipleJobs: true }, stateOptions: { wvOneEarner: true } }), /multiple jobs/);
   assert.throws(() => calculatePaycheck({ ...base, payDate: '2026-06-11' }), /unavailable before June 12/);
+});
+
+test('New Jersey percentage table A and B give the published weekly $1,000 amounts', () => {
+  const base = defaultInput('NJ');
+  const common = { grossPay: 1000, stateTaxableWages: 1000, localTaxableWages: 1000, ytdGrossWages: 0, ytdStateWages: 0, ytdPayrollContributions: {} };
+  const single = nj2026.calculate({ ...common, input: { ...base, payFrequency: 'weekly' } });
+  const joint = nj2026.calculate({ ...common, input: { ...base, payFrequency: 'weekly', federal: { ...base.federal, filingStatus: 'married_joint' } } });
+  assert.equal(single.incomeTaxWithholding, 29.38);
+  assert.equal(joint.incomeTaxWithholding, 18.34);
+  assert.deepEqual(single.payrollDeductions.map(item => item.amount), [3.83, .43, 1.9, 2.3]);
+});
+
+test('New Jersey UI and workforce contributions stop at $44,800; TDI and FLI stop at $171,100', () => {
+  const base = defaultInput('NJ');
+  const nearFirst = calculatePaycheck({ ...base, ytd: { grossWages: 44700 } });
+  assert.equal(nearFirst.state.payrollDeductions[0].amount, .38);
+  assert.equal(nearFirst.state.payrollDeductions[1].amount, .04);
+  const second = calculatePaycheck({ ...base, ytd: { grossWages: 171050 } });
+  assert.deepEqual(second.state.payrollDeductions.map(item => item.amount), [0, 0, .10, .12]);
+  const past = calculatePaycheck({ ...base, ytd: { grossWages: 171100 } });
+  assert.ok(past.state.payrollDeductions.every(item => item.amount === 0));
+});
+
+test('New Jersey 401(k) reduces state wages but salary reduction benefits do not', () => {
+  const base = defaultInput('NJ');
+  const contribution = (kind: '401k' | 'fsa' | 'health') => calculatePaycheck({ ...base, deductions: [{ id: kind, label: kind, kind, amount: 100, unit: 'dollars', timing: 'pre_tax' }] });
+  const ordinary = calculatePaycheck(base).state.incomeTaxWithholding;
+  assert.ok(contribution('401k').state.incomeTaxWithholding < ordinary);
+  assert.equal(contribution('fsa').state.incomeTaxWithholding, ordinary);
+  assert.equal(contribution('health').state.incomeTaxWithholding, ordinary);
+  assert.throws(() => calculatePaycheck({ ...base, stateOptions: { njRate: 'C' } }), /not yet supported/);
+});
+
+test('Wisconsin approved alternate method matches W-166 examples', () => {
+  const base = defaultInput('WI');
+  const inputFor = (wage: number, frequency: 'weekly' | 'biweekly', filingStatus: 'single' | 'married_joint', wiExemptions: number) => ({
+    input: { ...base, payFrequency: frequency, federal: { ...base.federal, filingStatus }, stateOptions: { wiExemptions } },
+    grossPay: wage, stateTaxableWages: wage, localTaxableWages: wage, ytdGrossWages: 0, ytdStateWages: 0, ytdPayrollContributions: {},
+  });
+  assert.equal(wi2026.calculate(inputFor(350, 'weekly', 'single', 1)).incomeTaxWithholding, 7.59);
+  assert.equal(wi2026.calculate(inputFor(500, 'weekly', 'single', 3)).incomeTaxWithholding, 14.34);
+  assert.equal(wi2026.calculate(inputFor(1000, 'biweekly', 'married_joint', 3)).incomeTaxWithholding, 22.08);
+});
+
+test('Wisconsin withholding supports WT-4 options and boundary wages', () => {
+  const base = defaultInput('WI');
+  const ordinary = calculatePaycheck(base);
+  assert.ok(ordinary.state.incomeTaxWithholding > 0);
+  assert.equal(calculatePaycheck({ ...base, stateOptions: { wiExempt: true } }).state.incomeTaxWithholding, 0);
+  assert.equal(calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 0 } }).state.incomeTaxWithholding, 0);
+  assert.ok(calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 500000 } }).state.incomeTaxWithholding > ordinary.state.incomeTaxWithholding);
+  assert.equal(calculatePaycheck({ ...base, stateOptions: { wiExtraWithholding: 10 } }).state.incomeTaxWithholding, ordinary.state.incomeTaxWithholding + 10);
+  assert.throws(() => calculatePaycheck({ ...base, stateOptions: { wiExemptions: 1.5 } }), /whole numbers/);
+});
+
+test('Oklahoma OW-2 official semimonthly example rounds $36.67 to $37', () => {
+  const base = defaultInput('OK');
+  const result = calculatePaycheck({ ...base, payFrequency: 'semimonthly', compensation: { type: 'hourly', hourlyRate: 18.25, regularHours: 100 }, federal: { ...base.federal, filingStatus: 'married_joint' }, stateOptions: { okAllowances: 2 } });
+  assert.equal(result.state.incomeTaxWithholding, 37);
+});
+
+test('Oklahoma tables cover four periods, zero pay, and single-rate election', () => {
+  const base = defaultInput('OK');
+  for (const payFrequency of ['weekly', 'biweekly', 'semimonthly', 'monthly'] as const) {
+    const result = calculatePaycheck({ ...base, payFrequency });
+    assert.ok(result.state.incomeTaxWithholding > 0);
+  }
+  assert.equal(calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 0 } }).state.incomeTaxWithholding, 0);
+  const married = { ...base, federal: { ...base.federal, filingStatus: 'married_joint' as const } };
+  assert.ok(calculatePaycheck({ ...married, stateOptions: { okSingleRate: true } }).state.incomeTaxWithholding > calculatePaycheck(married).state.incomeTaxWithholding);
+  assert.throws(() => calculatePaycheck({ ...base, stateOptions: { okAllowances: -1 } }), /whole numbers/);
+});
+
+test('North Dakota 2026 percentage table rounds $1,800 weekly wages to $13', () => {
+  const base = defaultInput('ND');
+  const result = calculatePaycheck({ ...base, payFrequency: 'weekly', compensation: { type: 'hourly', hourlyRate: 18, regularHours: 100 } });
+  // The booklet's worked example says $14, but its Single percentage table yields
+  // ($93,600 - $57,625) × 1.95% ÷ 52 = $13.49, rounded to $13.
+  assert.equal(result.state.incomeTaxWithholding, 13);
+});
+
+test('North Dakota current-W-4 schedules cover thresholds and high income', () => {
+  const base = defaultInput('ND');
+  assert.equal(calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 57625 } }).state.incomeTaxWithholding, 0);
+  assert.ok(calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 258450 } }).state.incomeTaxWithholding > 0);
+  assert.ok(calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 500000 } }).state.incomeTaxWithholding > 0);
+  const ordinary = calculatePaycheck(base).state.incomeTaxWithholding;
+  assert.equal(calculatePaycheck({ ...base, stateOptions: { ndExtraWithholding: 10 } }).state.incomeTaxWithholding, ordinary + 10);
+  assert.throws(() => calculatePaycheck({ ...base, stateOptions: { ndExtraWithholding: -1 } }), /nonnegative/);
+});
+
+test('Idaho revised 2026 percentage method matches state examples', () => {
+  const base = defaultInput('ID');
+  const single = calculatePaycheck({ ...base, payFrequency: 'biweekly', compensation: { type: 'hourly', hourlyRate: 12.12, regularHours: 100 } });
+  assert.equal(single.state.incomeTaxWithholding, 31);
+  const married = calculatePaycheck({ ...base, payFrequency: 'weekly', compensation: { type: 'hourly', hourlyRate: 10, regularHours: 100 }, federal: { ...base.federal, filingStatus: 'married_joint' } });
+  assert.equal(married.state.incomeTaxWithholding, 20);
+});
+
+test('Idaho revised table enforces its date and zero allowance value', () => {
+  const base = defaultInput('ID');
+  assert.equal(calculatePaycheck({ ...base, payFrequency: 'weekly', compensation: { type: 'hourly', hourlyRate: 10, regularHours: 31 } }).state.incomeTaxWithholding, 0);
+  assert.throws(() => calculatePaycheck({ ...base, payDate: '2026-06-01' }), /unavailable before July 31/);
+});
+
+test('Delaware approved annualized method matches its single and joint examples', () => {
+  const base = defaultInput('DE');
+  const single = calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 25000 }, payFrequency: 'weekly', stateOptions: { deExemptions: 1 } });
+  assert.equal(single.state.incomeTaxWithholding, 13.88);
+  const joint = calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 25000 }, payFrequency: 'weekly', federal: { ...base.federal, filingStatus: 'married_joint' }, stateOptions: { deExemptions: 3 } });
+  assert.equal(joint.state.incomeTaxWithholding, 6.52);
+});
+
+test('Delaware Paid Leave reflects employer size, share, and FICA wage cap', () => {
+  const base = defaultInput('DE');
+  const full = calculatePaycheck({ ...base, compensation: { type: 'hourly', hourlyRate: 25, regularHours: 40 } });
+  assert.equal(full.state.payrollDeductions[0].amount, 4);
+  const parental = calculatePaycheck({ ...base, compensation: { type: 'hourly', hourlyRate: 25, regularHours: 40 }, stateOptions: { deEmployerSize: 15 } });
+  assert.equal(parental.state.payrollDeductions[0].amount, 1.60);
+  assert.equal(calculatePaycheck({ ...base, stateOptions: { deEmployerSize: 9 } }).state.payrollDeductions[0].amount, 0);
+  assert.equal(calculatePaycheck({ ...base, ytd: { grossWages: 184500 } }).state.payrollDeductions[0].amount, 0);
+  assert.throws(() => calculatePaycheck({ ...base, stateOptions: { deEmployeeShare: .6 } }), /between zero and 50%/);
+});
+
+test('Rhode Island percentage method matches the official weekly exemption example', () => {
+  const base = defaultInput('RI');
+  const result = calculatePaycheck({ ...base, payFrequency: 'weekly', compensation: { type: 'hourly', hourlyRate: 21.95, regularHours: 100 }, stateOptions: { riExemptions: 1 } });
+  assert.equal(result.state.incomeTaxWithholding, 87.57);
+});
+
+test('Rhode Island TDI cap and RI W-4 phaseout are separate', () => {
+  const base = defaultInput('RI');
+  const nearCap = calculatePaycheck({ ...base, ytd: { stateWages: 99900 } });
+  assert.equal(nearCap.state.payrollDeductions[0].amount, 1.10);
+  const pastCap = calculatePaycheck({ ...base, ytd: { stateWages: 100000 } });
+  assert.equal(pastCap.state.payrollDeductions[0].amount, 0);
+  const high = { ...base, compensation: { type: 'salary' as const, annualSalary: 300000 } };
+  assert.equal(calculatePaycheck({ ...high, stateOptions: { riExemptions: 2 } }).state.incomeTaxWithholding, calculatePaycheck(high).state.incomeTaxWithholding);
+  assert.throws(() => calculatePaycheck({ ...base, stateOptions: { riExemptions: 1.5 } }), /whole numbers/);
+});
+
+test('Louisiana R-1210 applies the 2026 single and joint deduction formulas', () => {
+  const base = defaultInput('LA');
+  const single = calculatePaycheck({ ...base, payFrequency: 'weekly', compensation: { type: 'hourly', hourlyRate: 25, regularHours: 40 } });
+  assert.equal(single.state.incomeTaxWithholding, 23.25);
+  const joint = calculatePaycheck({ ...base, payFrequency: 'weekly', compensation: { type: 'hourly', hourlyRate: 25, regularHours: 40 }, federal: { ...base.federal, filingStatus: 'married_joint' } });
+  assert.equal(joint.state.incomeTaxWithholding, 15.60);
+  assert.equal(calculatePaycheck({ ...base, payFrequency: 'weekly', compensation: { type: 'hourly', hourlyRate: 25, regularHours: 40 }, stateOptions: { laNoStandardDeduction: true } }).state.incomeTaxWithholding, 30.90);
+});
+
+test('Louisiana withholding clamps low wages and validates L-4 inputs', () => {
+  const base = defaultInput('LA');
+  assert.equal(calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 0 } }).state.incomeTaxWithholding, 0);
+  assert.throws(() => calculatePaycheck({ ...base, stateOptions: { laExtraWithholding: -1 } }), /nonnegative/);
+});
+
+test('Nebraska 2026 percentage table matches a $1,000 weekly single calculation', () => {
+  const base = defaultInput('NE');
+  const result = calculatePaycheck({ ...base, payFrequency: 'weekly', compensation: { type: 'hourly', hourlyRate: 25, regularHours: 40 } });
+  assert.equal(result.state.incomeTaxWithholding, 36.06);
+});
+
+test('Nebraska allowances and special withholding floor cover boundaries', () => {
+  const base = defaultInput('NE');
+  const wage = { ...base, payFrequency: 'weekly' as const, compensation: { type: 'hourly' as const, hourlyRate: 2, regularHours: 40 } };
+  assert.ok(calculatePaycheck(wage).state.incomeTaxWithholding >= 0);
+  assert.equal(calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 0 } }).state.incomeTaxWithholding, 0);
+  assert.ok(calculatePaycheck({ ...base, stateOptions: { neAllowances: 1 } }).state.incomeTaxWithholding < calculatePaycheck(base).state.incomeTaxWithholding);
+  assert.throws(() => calculatePaycheck({ ...base, stateOptions: { neAllowances: 1.5 } }), /whole numbers/);
 });
