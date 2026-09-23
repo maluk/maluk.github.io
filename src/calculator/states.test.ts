@@ -356,6 +356,14 @@ test('Utah has zero withholding at zero wages', () => {
   assert.equal(calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 0 } }).state.incomeTaxWithholding, 0);
 });
 
+test('Utah revised Publication 14 starts June 1, 2026', () => {
+  const base = defaultInput('UT');
+  assert.throws(() => calculatePaycheck({ ...base, payDate: '2026-05-31' }), /earlier withholding schedule/);
+  const result = calculatePaycheck({ ...base, payDate: '2026-06-01' });
+  assert.equal(result.rules[1].effectiveFrom, '2026-06-01');
+  assert.ok(result.state.incomeTaxWithholding > 0);
+});
+
 test('Missouri 2026 official annual formula example gives $59 monthly', () => {
   const base = defaultInput('MO');
   const result = calculatePaycheck({ ...base, payFrequency: 'monthly', compensation: { type: 'salary', annualSalary: 35000 }, federal: { ...base.federal, filingStatus: 'married_joint' } });
@@ -736,6 +744,13 @@ test('Maine August 2026 percentage method matches all three official examples', 
   assert.equal(weekly(300, 'single', 2), 0);
   assert.equal(weekly(1000, 'single', 2), 32);
   assert.equal(weekly(4500, 'married_joint', 2), 256);
+});
+
+test('Maine revised withholding is unavailable before September 2026', () => {
+  const base = defaultInput('ME');
+  assert.throws(() => calculatePaycheck({ ...base, payDate: '2026-08-31' }), /earlier withholding schedule/);
+  const result = calculatePaycheck({ ...base, payDate: '2026-09-01' });
+  assert.equal(result.rules[1].effectiveFrom, '2026-09-01');
 });
 
 test('Maine Paid Leave wage cap, deduction phaseout, and surcharge boundaries', () => {

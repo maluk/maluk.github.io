@@ -16,7 +16,7 @@ const noTaxSources: Record<NoIncomeTaxState, TaxSource> = {
 };
 const waSources = [
   source('2026 Paid Family and Medical Leave premiums', 'Washington Employment Security Department', 'https://paidleave.wa.gov/updates/'),
-  source('WA Cares premiums', 'WA Cares Fund', 'https://wacaresfund.wa.gov/how-it-works/contributions'),
+  source('WA Cares premiums', 'WA Cares Fund', 'https://wacaresfund.wa.gov/help-support/frequently-asked-questions'),
 ];
 
 export function noIncomeTaxCalculator(state: NoIncomeTaxState, taxYear: 2025 | 2026): StateCalculator {
