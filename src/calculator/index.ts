@@ -37,6 +37,7 @@ export function calculatePaycheck(input: PaycheckInput, ruleSet?: StateCalculato
     input,
     grossPay,
     stateTaxableWages: deductions.wages.state,
+    socialSecurityTaxableWages: deductions.wages.socialSecurity,
     localTaxableWages: deductions.wages.local,
     ytdGrossWages: ytd.grossWages ?? projected,
     ytdStateWages: ytd.stateWages ?? projected * (grossPay ? deductions.wages.state / grossPay : 0),

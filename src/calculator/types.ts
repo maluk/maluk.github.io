@@ -74,6 +74,7 @@ export interface PayrollDeduction {
 export interface StateInput {
   input: PaycheckInput;
   grossPay: number;
+  socialSecurityTaxableWages?: number;
   stateTaxableWages: number;
   localTaxableWages: number;
   ytdGrossWages: number;

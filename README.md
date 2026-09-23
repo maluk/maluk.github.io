@@ -18,7 +18,7 @@ npm run dev
 
 The current-year sitemap and state selector include only jurisdictions whose rule modules have `metadata.status === 'verified'`. An unsupported state or year throws an error. Do not mark another state verified before implementing its withholding method, statewide employee deductions, official-source metadata, and golden/boundary tests.
 
-Implemented 2026: CA, FL, NY, TX, WA, AK, NV, SD, TN, NH, WY, PA, IL, IN. Implemented historical 2025: CA, FL, TX, WA. Other states and 2025 NY are still pending. Local New York City and Yonkers withholding is supported. Other local taxes are disclosed when omitted.
+Implemented 2026: all 50 states. Implemented historical 2025: CA, FL, TX, WA. Historical 2025 NY and District of Columbia are pending. Local New York City and Yonkers withholding is supported. Other local taxes are disclosed when omitted; Maryland county tax applies to residents and is excluded from the current estimate.
 
 The calculation assumes one employer and that the worker lives and works in the selected state. When YTD wages are blank, the library projects them from pay date and current earnings. Actual employer payroll records can differ, especially for midyear changes, benefits, and wage-base crossings.
 

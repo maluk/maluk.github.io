@@ -7,6 +7,9 @@ import { ca2025 } from './states/CA/2025.ts';
 import { al2026 } from './states/AL/2026.ts';
 import { nj2026 } from './states/NJ/2026.ts';
 import { wi2026 } from './states/WI/2026.ts';
+import { or2026 } from './states/OR/2026.ts';
+import { md2026 } from './states/MD/2026.ts';
+import { verifiedStatePages } from '../site/states.ts';
 
 test('California 2025 Method B matches EDD Example B', () => {
   const base = defaultInput('CA', 2025);
@@ -599,4 +602,246 @@ test('Nebraska allowances and special withholding floor cover boundaries', () =>
   assert.equal(calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 0 } }).state.incomeTaxWithholding, 0);
   assert.ok(calculatePaycheck({ ...base, stateOptions: { neAllowances: 1 } }).state.incomeTaxWithholding < calculatePaycheck(base).state.incomeTaxWithholding);
   assert.throws(() => calculatePaycheck({ ...base, stateOptions: { neAllowances: 1.5 } }), /whole numbers/);
+});
+
+test('New Mexico FYI-104 worked example with extra withholding is $41.80', () => {
+  const base = defaultInput('NM');
+  const result = calculatePaycheck({
+    ...base, payFrequency: 'weekly',
+    compensation: { type: 'hourly', hourlyRate: 25, regularHours: 40 },
+    federal: { ...base.federal, filingStatus: 'married_joint' },
+    stateOptions: { nmExtraWithholding: 20 },
+  });
+  assert.equal(result.state.incomeTaxWithholding, 41.80);
+});
+
+test('New Mexico 2026 tables select each pay frequency and filing schedule', () => {
+  const base = defaultInput('NM');
+  for (const [frequency, pay, expected] of [
+    ['weekly', 1000, 31.86], ['biweekly', 2000, 63.72],
+    ['semimonthly', 2000, 61.20], ['monthly', 4000, 122.37],
+  ] as const) {
+    const result = calculatePaycheck({ ...base, payFrequency: frequency, compensation: { type: 'hourly', hourlyRate: pay / 40, regularHours: 40 } });
+    assert.equal(result.state.incomeTaxWithholding, expected, frequency);
+  }
+  const head = calculatePaycheck({ ...base, payFrequency: 'weekly', compensation: { type: 'hourly', hourlyRate: 25, regularHours: 40 }, federal: { ...base.federal, filingStatus: 'head_of_household' } });
+  assert.equal(head.state.incomeTaxWithholding, 25.11);
+});
+
+test('New Mexico withholding boundaries, deductions, and W-4 choices', () => {
+  const base = defaultInput('NM');
+  const weekly = { ...base, payFrequency: 'weekly' as const };
+  assert.equal(calculatePaycheck({ ...weekly, compensation: { type: 'hourly', hourlyRate: 155 / 40, regularHours: 40 } }).state.incomeTaxWithholding, 0);
+  assert.equal(calculatePaycheck({ ...weekly, compensation: { type: 'hourly', hourlyRate: 261 / 40, regularHours: 40 } }).state.incomeTaxWithholding, 1.59);
+  assert.equal(calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 0 } }).state.incomeTaxWithholding, 0);
+  const joint = { ...weekly, compensation: { type: 'hourly' as const, hourlyRate: 25, regularHours: 40 }, federal: { ...base.federal, filingStatus: 'married_joint' as const } };
+  assert.ok(calculatePaycheck({ ...joint, stateOptions: { nmSingleRate: true } }).state.incomeTaxWithholding > calculatePaycheck(joint).state.incomeTaxWithholding);
+  assert.ok(calculatePaycheck({ ...joint, stateOptions: { nmAnnualDeductions: 5200 } }).state.incomeTaxWithholding < calculatePaycheck(joint).state.incomeTaxWithholding);
+  assert.throws(() => calculatePaycheck({ ...base, stateOptions: { nmAnnualDeductions: -1 } }), /nonnegative/);
+});
+
+test('Vermont GB-1210-2026 percentage tables cover all four pay periods', () => {
+  const base = defaultInput('VT');
+  for (const [frequency, wage, expected] of [
+    ['weekly', 1000, 30.99], ['biweekly', 2000, 61.94],
+    ['semimonthly', 2000, 61.51], ['monthly', 4000, 123.05],
+  ] as const) {
+    const result = calculatePaycheck({ ...base, payFrequency: frequency, compensation: { type: 'hourly', hourlyRate: wage / 40, regularHours: 40 } });
+    assert.equal(result.state.incomeTaxWithholding, expected, frequency);
+  }
+});
+
+test('Vermont W-4VT filing, allowances, and Child Care employee share', () => {
+  const base = defaultInput('VT');
+  const weekly = { ...base, payFrequency: 'weekly' as const, compensation: { type: 'hourly' as const, hourlyRate: 25, regularHours: 40 } };
+  assert.equal(calculatePaycheck(weekly).state.payrollDeductions[0].amount, 1.10);
+  assert.equal(calculatePaycheck({ ...weekly, stateOptions: { vtCccEmployeeRate: 0 } }).state.payrollDeductions[0].amount, 0);
+  assert.equal(calculatePaycheck({ ...weekly, federal: { ...base.federal, filingStatus: 'married_joint' } }).state.incomeTaxWithholding, 25.93);
+  assert.equal(calculatePaycheck({ ...weekly, federal: { ...base.federal, filingStatus: 'head_of_household' } }).state.incomeTaxWithholding, 27.51);
+  assert.equal(calculatePaycheck({ ...weekly, stateOptions: { vtAllowances: 1, vtExtraWithholding: 10 } }).state.incomeTaxWithholding, 37.51);
+  assert.throws(() => calculatePaycheck({ ...weekly, stateOptions: { vtAllowances: 1.5 } }), /whole numbers/);
+  assert.throws(() => calculatePaycheck({ ...weekly, stateOptions: { vtCccEmployeeRate: .002 } }), /between zero/);
+  assert.equal(calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 0 } }).state.incomeTaxWithholding, 0);
+});
+
+test('Montana 2026 employer guide worked examples match all MW-4 schedules', () => {
+  const base = defaultInput('MT');
+  const check = (frequency: 'weekly' | 'biweekly' | 'semimonthly', wage: number, filingStatus: 'single' | 'married_joint' | 'head_of_household', expected: number) => {
+    const result = calculatePaycheck({ ...base, payFrequency: frequency, compensation: { type: 'hourly', hourlyRate: wage / 40, regularHours: 40 }, federal: { ...base.federal, filingStatus } });
+    assert.equal(result.state.incomeTaxWithholding, expected);
+  };
+  check('semimonthly', 1375, 'single', 33);
+  check('biweekly', 2950, 'single', 114);
+  check('semimonthly', 1375, 'married_joint', 2);
+  check('biweekly', 5950, 'married_joint', 232);
+  check('semimonthly', 1375, 'head_of_household', 17);
+  check('biweekly', 4950, 'head_of_household', 201);
+});
+
+test('Montana brackets, both-working election, and fixed withholding', () => {
+  const base = defaultInput('MT');
+  assert.equal(calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 0 } }).state.incomeTaxWithholding, 0);
+  const joint = { ...base, federal: { ...base.federal, filingStatus: 'married_joint' as const } };
+  assert.ok(calculatePaycheck({ ...joint, stateOptions: { mtBothSpousesWorking: true } }).state.incomeTaxWithholding > calculatePaycheck(joint).state.incomeTaxWithholding);
+  assert.equal(calculatePaycheck({ ...joint, stateOptions: { mtFixedWithholding: 50, mtExtraWithholding: 10 } }).state.incomeTaxWithholding, 60);
+  assert.equal(calculatePaycheck({ ...joint, stateOptions: { mtExempt: true } }).state.incomeTaxWithholding, 0);
+  assert.throws(() => calculatePaycheck({ ...base, stateOptions: { mtFixedWithholding: -1 } }), /nonnegative/);
+});
+
+test('Maine August 2026 percentage method matches all three official examples', () => {
+  const base = defaultInput('ME');
+  const weekly = (wage: number, filingStatus: 'single' | 'married_joint', allowances: number) => calculatePaycheck({
+    ...base, payFrequency: 'weekly', compensation: { type: 'hourly', hourlyRate: wage / 40, regularHours: 40 },
+    federal: { ...base.federal, filingStatus }, stateOptions: { meAllowances: allowances },
+  }).state.incomeTaxWithholding;
+  assert.equal(weekly(300, 'single', 2), 0);
+  assert.equal(weekly(1000, 'single', 2), 32);
+  assert.equal(weekly(4500, 'married_joint', 2), 256);
+});
+
+test('Maine Paid Leave wage cap, deduction phaseout, and surcharge boundaries', () => {
+  const base = defaultInput('ME');
+  const atCap = calculatePaycheck({ ...base, ytd: { grossWages: 184500 } });
+  assert.equal(atCap.state.payrollDeductions[0].amount, 0);
+  const crossing = calculatePaycheck({ ...base, ytd: { grossWages: 184400 } });
+  assert.equal(crossing.state.payrollDeductions[0].amount, .50);
+  const high = calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 1200000 } });
+  assert.ok(high.state.incomeTaxWithholding > 0);
+  assert.equal(calculatePaycheck({ ...base, stateOptions: { mePfmlEmployeeRate: 0 } }).state.payrollDeductions[0].amount, 0);
+  assert.throws(() => calculatePaycheck({ ...base, stateOptions: { meAllowances: 1.5 } }), /whole numbers/);
+  assert.throws(() => calculatePaycheck({ ...base, stateOptions: { mePfmlEmployeeRate: .01 } }), /between zero/);
+});
+
+test('Arkansas 2026 DFA worked example gives $36.50 monthly', () => {
+  const base = defaultInput('AR');
+  const result = calculatePaycheck({ ...base, payFrequency: 'monthly', compensation: { type: 'salary', annualSalary: 25524 }, stateOptions: { arExemptions: 2 } });
+  assert.equal(result.state.incomeTaxWithholding, 36.50);
+});
+
+test('Arkansas formula handles midrange, high-income adjustment, and exemptions', () => {
+  const base = defaultInput('AR');
+  assert.equal(calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 0 } }).state.incomeTaxWithholding, 0);
+  const high = calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 250000 } });
+  assert.ok(high.state.incomeTaxWithholding > 0);
+  assert.ok(calculatePaycheck({ ...base, stateOptions: { arExemptions: 2 } }).state.incomeTaxWithholding < calculatePaycheck(base).state.incomeTaxWithholding);
+  assert.equal(calculatePaycheck({ ...base, stateOptions: { arExempt: true } }).state.incomeTaxWithholding, 0);
+  assert.throws(() => calculatePaycheck({ ...base, stateOptions: { arExemptions: 1.5 } }), /whole numbers/);
+});
+
+test('Minnesota 2026 employer computer formula follows its published steps', () => {
+  const base = defaultInput('MN');
+  const weekly = { ...base, payFrequency: 'weekly' as const, compensation: { type: 'hourly' as const, hourlyRate: 25, regularHours: 40 } };
+  assert.equal(calculatePaycheck(weekly).state.incomeTaxWithholding, 53);
+  assert.equal(calculatePaycheck({ ...weekly, federal: { ...base.federal, filingStatus: 'married_joint' } }).state.incomeTaxWithholding, 38);
+  assert.equal(calculatePaycheck({ ...weekly, stateOptions: { mnAllowances: 2 } }).state.incomeTaxWithholding, 39);
+  assert.equal(calculatePaycheck(weekly).state.payrollDeductions[0].amount, 4.40);
+});
+
+test('Minnesota Paid Leave cap and W-4MN elections are separate from FICA', () => {
+  const base = defaultInput('MN');
+  assert.equal(calculatePaycheck({ ...base, ytd: { socialSecurityWages: 185000 } }).state.payrollDeductions[0].amount, 0);
+  assert.equal(calculatePaycheck({ ...base, ytd: { socialSecurityWages: 184900 } }).state.payrollDeductions[0].amount, .44);
+  assert.equal(calculatePaycheck({ ...base, stateOptions: { mnPaidLeaveEmployeeRate: 0 } }).state.payrollDeductions[0].amount, 0);
+  const joint = { ...base, federal: { ...base.federal, filingStatus: 'married_joint' as const } };
+  assert.ok(calculatePaycheck({ ...joint, stateOptions: { mnNoCertificate: true } }).state.incomeTaxWithholding > calculatePaycheck(joint).state.incomeTaxWithholding);
+  assert.equal(calculatePaycheck({ ...base, stateOptions: { mnExempt: true } }).state.incomeTaxWithholding, 0);
+  assert.throws(() => calculatePaycheck({ ...base, stateOptions: { mnAllowances: 1.5 } }), /whole numbers/);
+});
+
+test('Hawaii Booklet A annualized 2026 example gives $9.58 weekly', () => {
+  const base = defaultInput('HI');
+  const result = calculatePaycheck({ ...base, payFrequency: 'weekly', compensation: { type: 'hourly', hourlyRate: 12.50, regularHours: 40 }, stateOptions: { hiAllowances: 3 } });
+  assert.equal(result.state.incomeTaxWithholding, 9.58);
+  assert.equal(result.state.payrollDeductions[0].amount, 2.50);
+});
+
+test('Hawaii TDI weekly cap and HW-4 choices are applied separately', () => {
+  const base = defaultInput('HI');
+  const high = { ...base, payFrequency: 'weekly' as const, compensation: { type: 'hourly' as const, hourlyRate: 75, regularHours: 40 } };
+  assert.equal(calculatePaycheck(high).state.payrollDeductions[0].amount, 7.50);
+  assert.equal(calculatePaycheck({ ...high, stateOptions: { hiTdiCovered: false } }).state.payrollDeductions[0].amount, 0);
+  assert.equal(calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 0 } }).state.incomeTaxWithholding, 0);
+  assert.ok(calculatePaycheck({ ...high, stateOptions: { hiAllowances: 2 } }).state.incomeTaxWithholding < calculatePaycheck(high).state.incomeTaxWithholding);
+  assert.throws(() => calculatePaycheck({ ...base, stateOptions: { hiTdiEmployeeRate: .01 } }), /between zero/);
+});
+
+test('Connecticut TPG-211 2026 worksheet produces distinct CT-W4 filing outcomes', () => {
+  const base = defaultInput('CT');
+  const weekly = { ...base, payFrequency: 'weekly' as const, compensation: { type: 'hourly' as const, hourlyRate: 25, regularHours: 40 } };
+  assert.equal(calculatePaycheck(weekly).state.incomeTaxWithholding, 40.24);
+  assert.equal(calculatePaycheck({ ...weekly, federal: { ...base.federal, filingStatus: 'married_joint' } }).state.incomeTaxWithholding, 16.09);
+  assert.equal(calculatePaycheck({ ...weekly, federal: { ...base.federal, filingStatus: 'head_of_household' } }).state.incomeTaxWithholding, 29.68);
+  assert.equal(calculatePaycheck(weekly).state.payrollDeductions[0].amount, 5);
+});
+
+test('Connecticut no-certificate, exemption, recapture, and Paid Leave cap', () => {
+  const base = defaultInput('CT');
+  const weekly = { ...base, payFrequency: 'weekly' as const, compensation: { type: 'hourly' as const, hourlyRate: 25, regularHours: 40 } };
+  assert.equal(calculatePaycheck({ ...weekly, stateOptions: { ctNoCertificate: true } }).state.incomeTaxWithholding, 69.90);
+  assert.equal(calculatePaycheck({ ...weekly, stateOptions: { ctCode: 'E' } }).state.incomeTaxWithholding, 0);
+  assert.ok(calculatePaycheck({ ...weekly, stateOptions: { ctCode: 'D' } }).state.incomeTaxWithholding > calculatePaycheck(weekly).state.incomeTaxWithholding);
+  const high = calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 600000 } });
+  assert.ok(high.state.incomeTaxWithholding > 0);
+  assert.equal(calculatePaycheck({ ...base, ytd: { socialSecurityWages: 184500 } }).state.payrollDeductions[0].amount, 0);
+  assert.throws(() => calculatePaycheck({ ...base, stateOptions: { ctCode: 'Z' } }), /CT-W4 code/);
+});
+
+test('Oregon 2026 formula follows the worked arithmetic in Example 1', () => {
+  const base = defaultInput('OR');
+  const result = or2026.calculate({ input: { ...base, payFrequency: 'monthly', compensation: { type: 'salary', annualSalary: 25000 } }, grossPay: 25000 / 12, stateTaxableWages: 25000 / 12, localTaxableWages: 25000 / 12, federalIncomeTaxWithholding: 1000 / 12, ytdGrossWages: 0, ytdStateWages: 0, ytdPayrollContributions: {} });
+  assert.equal(result.incomeTaxWithholding, 149.07);
+  assert.equal(result.payrollDeductions[0].amount, 2.08);
+  assert.equal(result.payrollDeductions[1].amount, 12.50);
+  assert.equal(result.payrollDeductions[2].amount, 1.57);
+  assert.equal(result.localSupported, false);
+});
+
+test('Oregon withholding and statewide contributions handle zero wages and annual caps', () => {
+  const base = defaultInput('OR');
+  const zero = calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 0 } });
+  assert.equal(zero.state.incomeTaxWithholding, 0);
+  assert.deepEqual(zero.state.payrollDeductions.map(line => line.amount), [0, 0, 0]);
+  const capped = calculatePaycheck({ ...base, ytd: { socialSecurityWages: 184500 } });
+  assert.equal(capped.state.payrollDeductions[1].amount, 0);
+  const crossing = calculatePaycheck({ ...base, ytd: { socialSecurityWages: 184400 } });
+  assert.equal(crossing.state.payrollDeductions[1].amount, .60);
+  assert.equal(calculatePaycheck({ ...base, stateOptions: { orExpiredExemption: true } }).state.incomeTaxWithholding, 307.69);
+  assert.throws(() => calculatePaycheck({ ...base, stateOptions: { orAllowances: 1.5 } }), /whole numbers/);
+});
+
+test('Maryland 2026 state percentage method separates the official 2.25% local table', () => {
+  const base = defaultInput('MD');
+  const weekly = calculatePaycheck({ ...base, payFrequency: 'weekly', compensation: { type: 'hourly', hourlyRate: 25, regularHours: 40 } });
+  assert.equal(weekly.state.incomeTaxWithholding, 44.39);
+  assert.equal(weekly.local.supported, false);
+  const taxable = 1000 - 65.38;
+  assert.equal(roundMoneyForTest(weekly.state.incomeTaxWithholding + taxable * .0225), 65.42);
+  const joint = calculatePaycheck({ ...base, payFrequency: 'weekly', compensation: { type: 'hourly', hourlyRate: 25, regularHours: 40 }, federal: { ...base.federal, filingStatus: 'married_joint' } });
+  assert.equal(joint.state.incomeTaxWithholding, 44.39);
+});
+
+test('Maryland brackets, MW507 exemptions, and zero-pay boundary', () => {
+  const base = defaultInput('MD');
+  assert.equal(calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 0 } }).state.incomeTaxWithholding, 0);
+  const noExemptions = calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 150000 } });
+  const twoExemptions = calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 150000 }, stateOptions: { mdExemptions: 2 } });
+  assert.ok(noExemptions.state.incomeTaxWithholding > twoExemptions.state.incomeTaxWithholding);
+  assert.equal(calculatePaycheck({ ...base, stateOptions: { mdExempt: true } }).state.incomeTaxWithholding, 0);
+  assert.throws(() => calculatePaycheck({ ...base, stateOptions: { mdExemptions: 1.5 } }), /whole numbers/);
+  const period = md2026.calculate({ input: { ...base, payFrequency: 'monthly' }, grossPay: 400, stateTaxableWages: 400, localTaxableWages: 400, ytdGrossWages: 0, ytdStateWages: 0, ytdPayrollContributions: {} });
+  assert.equal(period.incomeTaxWithholding, 0);
+});
+
+function roundMoneyForTest(value: number): number { return Math.round((value + Number.EPSILON) * 100) / 100; }
+
+test('all 50 verified state calculators handle zero and very high wages', () => {
+  assert.equal(verifiedStatePages.length, 50);
+  for (const page of verifiedStatePages) {
+    const base = defaultInput(page.code);
+    const zero = calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 0 } });
+    assert.equal(zero.netPay, 0, `${page.code} zero wages`);
+    const high = calculatePaycheck({ ...base, compensation: { type: 'salary', annualSalary: 1000000 } });
+    assert.ok(Number.isFinite(high.netPay) && high.netPay > 0, `${page.code} high wages`);
+    assert.ok(high.rules.every(rule => rule.status === 'verified' && rule.sources.length > 0), `${page.code} sources`);
+  }
 });
