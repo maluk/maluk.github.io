@@ -17,6 +17,19 @@ test('California 2025 Method B matches EDD Example B', () => {
   assert.equal(result.incomeTaxWithholding, 3.28);
 });
 
+test('California 2025 Method B matches EDD pay-period Examples C and D', () => {
+  const base = defaultInput('CA', 2025);
+  const examples = [
+    { grossPay: 5100, frequency: 'monthly', status: 'married_joint', allowances: 5, expected: 3.89 },
+    { grossPay: 950, frequency: 'weekly', status: 'head_of_household', allowances: 3, expected: 2.20 },
+  ] as const;
+  for (const example of examples) {
+    const input = { ...base, payFrequency: example.frequency, federal: { ...base.federal, filingStatus: example.status }, stateOptions: { caAllowances: example.allowances } };
+    const result = ca2025.calculate({ input, grossPay: example.grossPay, stateTaxableWages: example.grossPay, localTaxableWages: example.grossPay, ytdGrossWages: 0, ytdStateWages: 0, ytdPayrollContributions: {} });
+    assert.equal(result.incomeTaxWithholding, example.expected);
+  }
+});
+
 test('Washington 2025 Paid Leave premium has the historical rate and cap', () => {
   const base = defaultInput('WA', 2025);
   const result = calculatePaycheck({ ...base, ytd: { grossWages: 176000 } });
@@ -28,6 +41,32 @@ test('California Method B matches EDD Example B', () => {
   const base = defaultInput('CA');
   const result = ca2026.calculate({ input: { ...base, federal: { ...base.federal, filingStatus: 'married_joint' }, stateOptions: { caAllowances: 2, caDeductionAllowances: 1 }, compensation: { type: 'hourly', hourlyRate: 20, regularHours: 80 } }, grossPay: 1600, stateTaxableWages: 1600, localTaxableWages: 1600, ytdGrossWages: 0, ytdStateWages: 0, ytdPayrollContributions: {} });
   assert.equal(result.incomeTaxWithholding, 2.38);
+});
+
+test('California 2026 Method B matches EDD pay-period Examples C and D', () => {
+  const base = defaultInput('CA');
+  const examples = [
+    { grossPay: 5100, frequency: 'monthly', status: 'married_joint', allowances: 5, expected: 0.82 },
+    { grossPay: 950, frequency: 'weekly', status: 'head_of_household', allowances: 3, expected: 1.69 },
+  ] as const;
+  for (const example of examples) {
+    const input = { ...base, payFrequency: example.frequency, federal: { ...base.federal, filingStatus: example.status }, stateOptions: { caAllowances: example.allowances } };
+    const result = ca2026.calculate({ input, grossPay: example.grossPay, stateTaxableWages: example.grossPay, localTaxableWages: example.grossPay, ytdGrossWages: 0, ytdStateWages: 0, ytdPayrollContributions: {} });
+    assert.equal(result.incomeTaxWithholding, example.expected);
+  }
+});
+
+test('California weekly bracket edges and requested extra withholding', () => {
+  for (const [year, rule, grossPay, expected] of [
+    [2025, ca2025, 597, 8.51],
+    [2026, ca2026, 615, 8.76],
+  ] as const) {
+    const base = defaultInput('CA', year);
+    const input = { ...base, payFrequency: 'weekly' as const };
+    const common = { input, grossPay, stateTaxableWages: grossPay, localTaxableWages: grossPay, ytdGrossWages: 0, ytdStateWages: 0, ytdPayrollContributions: {} };
+    assert.equal(rule.calculate(common).incomeTaxWithholding, expected);
+    assert.equal(rule.calculate({ ...common, grossPay: 300, stateTaxableWages: 300, localTaxableWages: 300, input: { ...input, stateOptions: { caExtraWithholding: 5 } } }).incomeTaxWithholding, 5);
+  }
 });
 
 test('California 2026 SDI is 1.3% without a wage cap', () => {

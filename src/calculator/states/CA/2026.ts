@@ -1,12 +1,8 @@
 import type { StateCalculator, StateInput, StateResult, TaxRuleMetadata } from '../../types.ts';
 import { roundMoney } from '../../money.ts';
 import { annualWithholding } from '../../federal/tables.ts';
+import { periodRows } from './2026Tables.ts';
 
-type Row = readonly [number, number, number];
-const single: Row[] = [[0,0,.011],[11079,121.87,.022],[26264,455.94,.044],[41452,1124.21,.066],[57542,2186.15,.088],[72724,3522.17,.1023],[371479,34084.81,.1133],[445771,42502.09,.1243],[742953,79441.81,.1353],[1000000,114220.27,.1463]];
-const married: Row[] = [[0,0,.011],[22158,243.74,.022],[52528,911.88,.044],[82904,2248.42,.066],[115084,4372.30,.088],[145448,7044.33,.1023],[742958,68169.60,.1133],[891542,85004.17,.1243],[1000000,98485.50,.1353],[1485906,164228.58,.1463]];
-const head: Row[] = [[0,0,.011],[22173,243.90,.022],[52530,911.75,.044],[67716,1579.93,.066],[83805,2641.80,.088],[98990,3978.08,.1023],[505208,45534.18,.1133],[606251,56982.35,.1243],[1000000,105925.35,.1353],[1010417,107334.77,.1463]];
-const periods = { weekly: 52, biweekly: 26, semimonthly: 24, monthly: 12 };
 const lowSingle = { weekly: 363, biweekly: 727, semimonthly: 787, monthly: 1575 };
 const lowOther = { weekly: 727, biweekly: 1454, semimonthly: 1575, monthly: 3149 };
 const deductionSingle = { weekly: 110, biweekly: 219, semimonthly: 238, monthly: 476 };
@@ -26,7 +22,7 @@ const estimatedAllowance = {
 
 const metadata: TaxRuleMetadata = {
   jurisdiction: 'CA', taxYear: 2026, effectiveFrom: '2026-01-01', effectiveTo: '2026-12-31',
-  lastVerified: '2026-09-22', status: 'verified', version: '2026.1', sources: [
+  lastVerified: '2026-09-23', status: 'verified', version: '2026.2', sources: [
     { title: '2026 Withholding Schedules, Method B', authority: 'California EDD', url: 'https://edd.ca.gov/siteassets/files/pdf_pub_ctr/26methb.pdf' },
     { title: 'Contribution Rates and Withholding', authority: 'California EDD', url: 'https://edd.ca.gov/en/Payroll_Taxes/Rates_and_Withholding' },
   ],
@@ -35,7 +31,7 @@ const metadata: TaxRuleMetadata = {
 export const ca2026: StateCalculator = {
   metadata,
   getSources: () => metadata.sources,
-  getAssumptions: () => ['California withholding uses EDD Method B and zero DE 4 allowances unless entered.'],
+  getAssumptions: () => ['California withholding uses EDD Method B and zero DE 4 allowances unless entered.', 'For married filers, the federal multiple-jobs checkbox selects California’s dual-income married schedule.'],
   calculate({ input, grossPay, stateTaxableWages }: StateInput): StateResult {
     const frequency = input.payFrequency;
     const allowances = Number(input.stateOptions?.caAllowances ?? 0);
@@ -50,9 +46,9 @@ export const ca2026: StateCalculator = {
     const deductionAllowanceAmount = deductionAllowances <= 10 ? estimatedAllowance[frequency][deductionAllowances] : deductionAllowances * estimatedAllowance[frequency][1];
     const credit = allowances <= 10 ? allowanceCredit[frequency][allowances] : allowances * allowanceCredit[frequency][1];
     const taxable = Math.max(0, stateTaxableWages - standard - deductionAllowanceAmount);
-    const rows = status === 'head_of_household' ? head : isMarried ? married : single;
-    const annual = annualWithholding(taxable * periods[frequency], rows);
-    const withholding = stateTaxableWages <= low ? 0 : roundMoney(Math.max(0, annual / periods[frequency] - credit) + extra);
+    const rows = periodRows[frequency][status === 'head_of_household' ? 'head' : isMarried ? 'married' : 'single'];
+    const tax = roundMoney(annualWithholding(taxable, rows));
+    const withholding = roundMoney((stateTaxableWages <= low ? 0 : Math.max(0, tax - credit)) + extra);
     return {
       incomeTaxWithholding: withholding,
       payrollDeductions: [{ id: 'ca-sdi', label: 'California SDI', amount: roundMoney(grossPay * .013) }],
