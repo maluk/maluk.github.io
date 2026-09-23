@@ -22,3 +22,5 @@ Reviewed September 23, 2026 for the 2026 current-year release on GitHub Pages.
 ## Release checks
 
 `npm test`, `npm run build`, and `npm run verify:static` are the required release commands. `verify:static` checks all 50 HTML state pages, prerendered results, sitemap entries, self canonicals, the custom domain, Next asset support, and the five legacy refresh pages. Desktop and 390px mobile calculator flows were checked in Chrome on September 23, 2026.
+
+The September 23 deployment passed those commands and published `gh-pages` commit `54daf01`. Direct live HTTP checks returned 200 for the homepage and representative state pages, 200 for the legacy `/texas/2026/` canonical noindex refresh page, and 404 for a nonexistent URL. The live sitemap contains 55 locations: the homepage, 50 current-year state pages, and four historical pages. The live calculator responded to the Salary/Hourly switch. Google Search Console confirmed successful resubmission of `https://thetax.us/sitemap.xml`; its discovered-page count will reflect the new file after a later crawl.
