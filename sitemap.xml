@@ -1,68 +1,223 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://thetax.us/</loc>
-    <changefreq>yearly</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>https://thetax.us/california/</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://thetax.us/new-york/</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://thetax.us/texas/</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://thetax.us/washington/</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://thetax.us/california/2026/</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://thetax.us/california/2025/</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://thetax.us/new-york/2026/</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://thetax.us/new-york/2025/</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://thetax.us/texas/2026/</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://thetax.us/texas/2025/</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://thetax.us/washington/2026/</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://thetax.us/washington/2025/</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.7</priority>
-  </url>
+<url>
+<loc>https://thetax.us/</loc>
+<priority>1</priority>
+</url>
+<url>
+<loc>https://thetax.us/california/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/texas/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/new-york/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/florida/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/washington/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/nevada/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/south-dakota/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/tennessee/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/new-hampshire/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/wyoming/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/alaska/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/pennsylvania/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/illinois/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/indiana/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/michigan/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/north-carolina/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/georgia/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/arizona/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/ohio/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/virginia/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/massachusetts/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/colorado/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/kentucky/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/utah/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/missouri/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/iowa/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/mississippi/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/south-carolina/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/alabama/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/kansas/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/west-virginia/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/new-jersey/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/wisconsin/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/oklahoma/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/north-dakota/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/idaho/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/delaware/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/rhode-island/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/louisiana/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/nebraska/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/new-mexico/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/vermont/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/montana/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/maine/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/arkansas/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/minnesota/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/hawaii/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/connecticut/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/oregon/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/maryland/</loc>
+<priority>0.9</priority>
+</url>
+<url>
+<loc>https://thetax.us/california/2025/</loc>
+<priority>0.5</priority>
+</url>
+<url>
+<loc>https://thetax.us/texas/2025/</loc>
+<priority>0.5</priority>
+</url>
+<url>
+<loc>https://thetax.us/florida/2025/</loc>
+<priority>0.5</priority>
+</url>
+<url>
+<loc>https://thetax.us/washington/2025/</loc>
+<priority>0.5</priority>
+</url>
 </urlset>
