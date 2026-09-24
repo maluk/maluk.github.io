@@ -1,2 +1,2 @@
 :HL["/_next/static/chunks/375ssukskq63n.css","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":4176,"slots":{"children":{"name":"stateSlug","param":{"type":"d","key":"pennsylvania","siblings":[]},"prefetchHints":4192,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":4256,"slots":null}}}}},"staleTime":300,"buildId":"wwz81Cf8eA9x8_gXYl7-6"}
+0:{"tree":{"name":"","param":null,"prefetchHints":4176,"slots":{"children":{"name":"stateSlug","param":{"type":"d","key":"pennsylvania","siblings":[]},"prefetchHints":4192,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":4256,"slots":null}}}}},"staleTime":300,"buildId":"vJ6ieK6KjX09I0-o_U1di"}
