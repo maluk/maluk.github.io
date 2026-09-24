@@ -33,7 +33,9 @@ function ResultLine({ label, amount, gross = false }: { label: string; amount: n
 
 export function Calculator({ initialInput, initialResult }: { initialInput: PaycheckInput; initialResult: PaycheckResult }) {
   useEffect(() => { track('calculator_view'); }, []);
-  const availableStates = verifiedStatePages.filter(page => stateCalculators[initialInput.taxYear]?.[page.code]?.metadata.status === 'verified');
+  const availableStates = verifiedStatePages
+    .filter(page => stateCalculators[initialInput.taxYear]?.[page.code]?.metadata.status === 'verified')
+    .sort((a, b) => a.name.localeCompare(b.name, 'en'));
   const [input, setInput] = useState(initialInput);
   const [advanced, setAdvanced] = useState(false);
   const [newDeduction, setNewDeduction] = useState<Deduction['kind']>('401k');
