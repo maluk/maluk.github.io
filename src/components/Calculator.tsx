@@ -12,7 +12,13 @@ function track(event: string, data?: Record<string, string>) {
   if (typeof window === 'undefined') return;
   const w = window as typeof window & { gtag?: (...args: unknown[]) => void; umami?: { track: (name: string, data?: Record<string, string>) => void } };
   w.gtag?.('event', event, data);
-  w.umami?.track(event, data);
+  if (w.umami) {
+    w.umami.track(event, data);
+  } else {
+    // Hydration can finish before the deferred tracker loads.
+    document.querySelector<HTMLScriptElement>('script[src="https://cloud.umami.is/script.js"]')
+      ?.addEventListener('load', () => w.umami?.track(event, data), { once: true });
+  }
 }
 
 const statusLabels = { single: 'Single', married_joint: 'Married filing jointly', married_separate: 'Married filing separately', head_of_household: 'Head of household' };
