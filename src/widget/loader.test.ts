@@ -5,7 +5,7 @@ import { runInNewContext } from 'node:vm';
 
 const loader = readFileSync(new URL('../../public/embed/v1.js', import.meta.url), 'utf8');
 
-function environment(count = 1) {
+function environment(count = 1, tracking?: string) {
   const listeners: ((event: { origin: string; source: unknown; data: unknown }) => void)[] = [];
   const messages: unknown[] = [];
   const loads: (() => void)[] = [];
@@ -13,7 +13,7 @@ function environment(count = 1) {
   const containers = Array.from({ length: count }, () => ({
     initialized: false,
     setAttribute() { this.initialized = true; },
-    getAttribute(name: string) { return name === 'data-state' ? 'TX' : 'aabbcc'; },
+    getAttribute(name: string) { return name === 'data-state' ? 'TX' : name === 'data-accent' ? 'aabbcc' : name === 'data-tracking' ? tracking : null; },
     prepend(frame: typeof frames[number]) { frames.push(frame); },
   }));
   const context = {
@@ -33,7 +33,14 @@ test('loader initializes multiple widgets once, including repeated script inclus
   env.run(); env.run();
   assert.equal(env.frames.length, 2);
   assert.equal(env.listeners.length, 2);
-  assert.equal(env.frames[0].src, 'https://thetax.us/embed/paycheck/?state=TX&accent=aabbcc');
+  assert.equal(env.frames[0].src, 'https://thetax.us/embed/paycheck/?state=TX&accent=aabbcc&embed=script');
+  env.loads[0]();
+  assert.equal(JSON.stringify(env.messages[0]), JSON.stringify([{ type: 'thetax:init:v1' }, 'https://thetax.us']));
+});
+
+test('loader forwards publisher tracking opt-out without changing the resize contract', () => {
+  const env = environment(1, 'off'); env.run();
+  assert.equal(new URL(env.frames[0].src!).searchParams.get('tracking'), 'off');
   env.loads[0]();
   assert.equal(JSON.stringify(env.messages[0]), JSON.stringify([{ type: 'thetax:init:v1' }, 'https://thetax.us']));
 });

@@ -19,7 +19,9 @@ assert.ok(sitemap.includes('<loc>https://thetax.us/widgets/</loc>'), 'Builder mi
 assert.ok(!sitemap.includes('/embed/'), 'Embeds must not appear in sitemap');
 assert.ok(embed.includes('name="robots" content="noindex, follow"'), 'Embed must not be indexed');
 assert.ok(embed.includes('What’s your take-home pay?') && embed.includes('Powered by'), 'Embed must contain calculator and attribution');
-assert.ok(!embed.includes('<header class="site-header"') && !embed.includes('<footer class="site-footer"') && !embed.includes('cloud.umami.is'), 'Embed must omit site chrome and analytics');
+assert.ok(!embed.includes('<header class="site-header"') && !embed.includes('<footer class="site-footer"') && !embed.includes('cloud.umami.is/script.js'), 'Embed must omit site chrome and the automatic analytics tracker');
+assert.ok(widgets.includes('Tracking respects Do Not Track.') && widgets.includes('tracking=off'), 'Widget tracking disclosure and opt-out must be visible');
+assert.ok(widgets.includes('preview=1'), 'Builder preview must disable embedded tracking');
 assert.ok(existsSync(join(root, 'embed/v1.js')), 'Widget loader missing from static export');
 
 for (const page of verifiedStatePages) {

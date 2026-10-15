@@ -52,6 +52,6 @@ export function embedSnippets(state: string, accent: string) {
   const fallback = '<p><a href="https://thetax.us/">Paycheck calculator powered by TheTax.us</a></p>';
   return {
     script: `<div data-thetax-widget data-state="${config.state}" data-accent="${config.accent}">\n  ${fallback}\n</div>\n<script async src="https://thetax.us/embed/v1.js"></script>`,
-    iframe: `<iframe src="https://thetax.us${embedPath(config.state, config.accent).replaceAll('&', '&amp;')}" title="Estimated paycheck calculator — TheTax.us" width="100%" height="900" loading="lazy" referrerpolicy="no-referrer" style="display:block;border:0;"></iframe>\n${fallback}`,
+    iframe: `<iframe src="https://thetax.us${embedPath(config.state, config.accent).replaceAll('&', '&amp;')}" title="Estimated paycheck calculator — TheTax.us" width="100%" height="900" loading="lazy" referrerpolicy="origin" style="display:block;border:0;"></iframe>\n${fallback}`,
   };
 }

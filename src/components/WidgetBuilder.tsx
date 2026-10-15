@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { DEFAULT_ACCENT, embedPath, embedSnippets, widgetStates } from '../widget/config.ts';
+import { copyWidgetCode, trackSiteEvent } from '../site/tracking.ts';
 
 export function WidgetBuilder() {
   const [state, setState] = useState('CA');
@@ -24,8 +25,9 @@ export function WidgetBuilder() {
   }, []);
   useEffect(() => { setCopyStatus(''); }, [snippet]);
   const copy = async () => {
-    try { await navigator.clipboard.writeText(snippet); setCopyStatus('Embed code copied.'); }
-    catch { code.current?.focus(); code.current?.select(); setCopyStatus('Select and copy the code below.'); }
+    const copied = await copyWidgetCode(snippet, value => navigator.clipboard.writeText(value), () => trackSiteEvent('widget_code_copied', { embed_method: mode }));
+    if (copied) setCopyStatus('Embed code copied.');
+    else { code.current?.focus(); code.current?.select(); setCopyStatus('Select and copy the code below.'); }
   };
 
   return <div className="widget-builder">
@@ -39,6 +41,6 @@ export function WidgetBuilder() {
       <button type="button" className="calculate-button" onClick={copy}>Copy embed code <span aria-hidden="true">↗</span></button><p className="help" role="status">{copyStatus}</p>
       <p className="help">Free to embed. Keep the TheTax.us attribution and fallback link visible.</p>
     </section>
-    <section className="widget-preview" aria-labelledby="preview-heading"><div className="preview-heading"><h2 id="preview-heading">Live preview</h2><span>Try it below</span></div><iframe key={`${state}-${accent}`} ref={frame} src={embedPath(state, accent)} title="Live paycheck widget preview" style={{ height }} /></section>
+    <section className="widget-preview" aria-labelledby="preview-heading"><div className="preview-heading"><h2 id="preview-heading">Live preview</h2><span>Try it below</span></div><iframe key={`${state}-${accent}`} ref={frame} src={`${embedPath(state, accent)}&preview=1`} title="Live paycheck widget preview" style={{ height }} /></section>
   </div>;
 }

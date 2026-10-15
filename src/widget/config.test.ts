@@ -57,6 +57,7 @@ test('both snippets include attribution and escape configuration', () => {
   assert.ok(snippets.script.includes('data-state="NY" data-accent="abcdef"'));
   assert.ok(snippets.iframe.includes('state=NY&amp;accent=abcdef'));
   assert.ok(snippets.iframe.includes('height="900"'));
+  assert.ok(snippets.iframe.includes('referrerpolicy="origin"'));
   for (const code of Object.values(snippets)) assert.ok(code.includes('Paycheck calculator powered by TheTax.us'));
   for (const code of Object.values(embedSnippets('"><script>', '"><script>'))) assert.ok(!code.includes('"><script>'));
 });

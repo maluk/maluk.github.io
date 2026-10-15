@@ -9,18 +9,7 @@ import { verifiedStatePages } from '../site/states.ts';
 import { stateCalculators } from '../calculator/states/index.ts';
 import { useWidgetHandoff } from './SiteRuntime';
 import { applyHandoff } from '../widget/config.ts';
-
-function track(event: string, data?: Record<string, string>) {
-  if (typeof window === 'undefined') return;
-  const w = window as typeof window & { gtag?: (...args: unknown[]) => void; umami?: { track: (name: string, data?: Record<string, string>) => void } };
-  w.gtag?.('event', event, data);
-  if (w.umami) {
-    w.umami.track(event, data);
-  } else {
-    // Hydration can finish before the deferred tracker loads.
-    window.addEventListener('thetax:analytics-ready', () => w.umami?.track(event, data), { once: true });
-  }
-}
+import { trackSiteEvent as track } from '../site/tracking.ts';
 
 const statusLabels = { single: 'Single', married_joint: 'Married filing jointly', married_separate: 'Married filing separately', head_of_household: 'Head of household' };
 const deductionLabels: Record<Deduction['kind'], string> = { '401k': 'Traditional 401(k)', hsa: 'HSA', fsa: 'FSA', health: 'Health insurance', dental: 'Dental', vision: 'Vision', custom: 'Custom deduction' };

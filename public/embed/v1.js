@@ -8,6 +8,8 @@
     var url = new URL('/embed/paycheck/', origin);
     url.searchParams.set('state', container.getAttribute('data-state') || 'CA');
     url.searchParams.set('accent', container.getAttribute('data-accent') || '006b60');
+    url.searchParams.set('embed', 'script');
+    if (container.getAttribute('data-tracking') === 'off') url.searchParams.set('tracking', 'off');
     var frame = document.createElement('iframe');
     frame.title = 'Estimated paycheck calculator - TheTax.us';
     frame.loading = 'lazy';
