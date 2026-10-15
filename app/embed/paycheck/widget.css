@@ -1,0 +1,21 @@
+body:has(.paycheck-widget){background:white}
+.paycheck-widget{width:100%;min-width:0;max-width:760px;margin:0 auto;border:1px solid var(--line);border-top:5px solid var(--widget-accent);border-radius:12px;background:white;padding:24px;color:var(--ink);overflow-wrap:anywhere}
+.widget-heading h1{font-size:1.6rem;line-height:1.2;letter-spacing:-.04em;margin:4px 0 8px}
+.widget-heading>p:last-child{font-size:.88rem;color:var(--muted);margin:0 0 22px}
+.widget-fields{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+.widget-result{background:var(--pale);border-radius:10px;padding:18px}
+.widget-result [role=status]>p{font-size:.8rem;color:var(--muted);margin:0 0 4px}
+.widget-net{display:block;font-size:clamp(1.8rem,8vw,2.6rem);line-height:1.2;color:var(--sea);letter-spacing:-.05em;font-variant-numeric:tabular-nums}
+.widget-breakdown{margin:18px 0 0;padding-top:10px;border-top:1px solid var(--line);font-size:.85rem}
+.widget-breakdown>div{display:flex;justify-content:space-between;gap:12px;padding:5px 0}
+.widget-breakdown dd{margin:0;white-space:nowrap;font-weight:650;font-variant-numeric:tabular-nums}
+.widget-assumption{font-size:.76rem;color:#485958;margin:16px 0 0}
+.widget-result .local-notice{font-size:.78rem;padding:10px;margin-top:12px}
+.widget-result .assumptions{font-size:.78rem;margin-top:12px;padding-top:12px}
+.widget-result ul{padding-left:18px}
+.widget-cta{display:flex;justify-content:space-between;gap:8px;color:white;background:var(--sea);font-size:.85rem;font-weight:750;border-radius:7px;padding:12px;margin-top:18px;text-decoration:none}
+.widget-cta:hover{color:white;background:var(--sea-dark)}
+.widget-footer{font-size:.74rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:18px;color:var(--muted)}
+.widget-footer a{color:var(--sea);text-decoration:none}.widget-footer p{margin:0}
+.paycheck-widget a:focus-visible,.paycheck-widget summary:focus-visible{outline:3px solid var(--sea);outline-offset:3px}
+@media(max-width:380px){.paycheck-widget{padding:16px}.widget-fields{grid-template-columns:1fr}.widget-heading h1{font-size:1.4rem}.widget-result{padding:14px}}

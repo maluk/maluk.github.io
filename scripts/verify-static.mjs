@@ -10,6 +10,17 @@ assert.ok(home.includes('Know what actually lands in your bank account.'), 'Home
 assert.equal(verifiedStatePages.length, 50, 'Exactly 50 current state pages must be verified');
 assert.equal(readFileSync(join(root, 'CNAME'), 'utf8').trim(), 'thetax.us', 'GitHub Pages custom domain is missing');
 assert.ok(existsSync(join(root, '.nojekyll')), 'GitHub Pages must serve _next assets');
+const widgets = readFileSync(join(root, 'widgets/index.html'), 'utf8');
+const embed = readFileSync(join(root, 'embed/paycheck/index.html'), 'utf8');
+assert.ok(widgets.includes('Set up your widget') && widgets.includes('Live preview'), 'Publisher builder must be prerendered');
+assert.ok(widgets.includes('rel="canonical" href="https://thetax.us/widgets/"'), 'Builder must have a canonical URL');
+assert.ok(home.includes('href="/widgets/"'), 'Widget offering must be discoverable');
+assert.ok(sitemap.includes('<loc>https://thetax.us/widgets/</loc>'), 'Builder missing from sitemap');
+assert.ok(!sitemap.includes('/embed/'), 'Embeds must not appear in sitemap');
+assert.ok(embed.includes('name="robots" content="noindex, follow"'), 'Embed must not be indexed');
+assert.ok(embed.includes('What’s your take-home pay?') && embed.includes('Powered by'), 'Embed must contain calculator and attribution');
+assert.ok(!embed.includes('<header class="site-header"') && !embed.includes('<footer class="site-footer"') && !embed.includes('cloud.umami.is'), 'Embed must omit site chrome and analytics');
+assert.ok(existsSync(join(root, 'embed/v1.js')), 'Widget loader missing from static export');
 
 for (const page of verifiedStatePages) {
   const path = join(root, page.slug, 'index.html');

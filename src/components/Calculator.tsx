@@ -7,6 +7,8 @@ import { comparePayFrequencies, periodsPerYear } from '../calculator/periods.ts'
 import { currency, wholeCurrency } from '../site/format.ts';
 import { verifiedStatePages } from '../site/states.ts';
 import { stateCalculators } from '../calculator/states/index.ts';
+import { useWidgetHandoff } from './SiteRuntime';
+import { applyHandoff } from '../widget/config.ts';
 
 function track(event: string, data?: Record<string, string>) {
   if (typeof window === 'undefined') return;
@@ -16,8 +18,7 @@ function track(event: string, data?: Record<string, string>) {
     w.umami.track(event, data);
   } else {
     // Hydration can finish before the deferred tracker loads.
-    document.querySelector<HTMLScriptElement>('script[src="https://cloud.umami.is/script.js"]')
-      ?.addEventListener('load', () => w.umami?.track(event, data), { once: true });
+    window.addEventListener('thetax:analytics-ready', () => w.umami?.track(event, data), { once: true });
   }
 }
 
@@ -43,6 +44,13 @@ export function Calculator({ initialInput, initialResult }: { initialInput: Payc
     .filter(page => stateCalculators[initialInput.taxYear]?.[page.code]?.metadata.status === 'verified')
     .sort((a, b) => a.name.localeCompare(b.name, 'en'));
   const [input, setInput] = useState(initialInput);
+  const handoff = useWidgetHandoff();
+  useEffect(() => {
+    if (handoff) {
+      const next = applyHandoff(initialInput, handoff);
+      if (next) setInput(next);
+    }
+  }, [handoff, initialInput]);
   const [advanced, setAdvanced] = useState(false);
   const [newDeduction, setNewDeduction] = useState<Deduction['kind']>('401k');
   const [shareStatus, setShareStatus] = useState('');
